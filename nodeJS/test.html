@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<style type="text/css">
+		.point{
+			position: absolute;
+			border-radius: 50px;
+			height: 50px;
+			width: 50px;
+			background-color: red;
+			visibility: hidden;
+		}
+	</style>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script type="text/javascript">
+		function get()
+		{
+			$.ajax({
+			  	url: "http://127.0.0.1:8080/",
+				success: function(data)
+				{
+					$(".point").html(data);
+					$(".point").css("left","150px");
+					$(".point").css("top","300px");
+				}});
+		}
+
+		//setInterval(function(){ get(); }, 500);
+
+		$(document).ready(function() {
+			$(".point").css("visibility","hidden");
+			$(".1").css("visibility","visible");
+		});
+	</script>
+</head>
+<body>
+	<h1>My data: </h1>
+	<div class="content">
+		...
+	</div>
+	<div class="point 1">
+	</div>
+	<img src="v1.png" style="z-index: -1000; position: absolute; left: 0; top: 0; width: 100%; height: 100%">
+</body>
+</html>

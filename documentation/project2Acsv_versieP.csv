@@ -1,58 +1,61 @@
-ï»¿Aanduiding,MAC2,locatiebeschrijving,,MAC nodig,,op kaart,,
-lwap-89102-0015,18:80:90:26:07:68,"onderwijslab bouwkunde, muur kant station",,40:01:7a:80:7f:13,,ok,,
-lwap-89102-0040,70:DF:2F:74:9A:F4,onderzoekslab recycon,,40:01:7a:12:e0:74,,ok,,
-lwap-89102-0050,00:A7:42:87:79:7C,onderzoekslab omgevingstechnieken,,00:a7:42:8e:8b:33,,ok,,
-lwap-89102-0070,2C:5A:0F:0A:C3:FC,opslag bulk en puin,,f8:0b:cb:3d:87:63,,ok,,
-lwap-89102-0088,00:2C:C8:EA:D1:C0,technisch lokaal vitale delen,,niet aanwezig,,niet aanwezig,,
-lwap-89102-00102,70:DF:2F:74:9E:18,"naast toiletten inkom, boven plafond",,40:01:7a:12:ec:d3,,ok,,
-lwap-89102-00192-1,00:2C:C8:EA:31:F4,"inkomhal, rechts van trappengang",,00:2c:c8:f1:36:d2,,ok,,
-lwap-89102-00192-2,2C:33:11:23:F6:64,"inkomhal, links van trappengang",,00:2c:c8:ep:23:79,,ok,,
-lwap-89102-0101,70:DF:2F:1D:1C:1C,"AP landschapskantoor 1e, midden vergaderzalen",,40:01:7a:14:08:03,,ok,,
-lwap-89102-0120,70:DF:2F:1D:1B:64,onderwijslab mechanische structuren en vibro akoestiek,,40:01:7a:14:05:33,,ok,,
-lwap-89102-0150,18:80:90:26:05:B4,onderwijslab aandrijf en energietechnieken,,40:01:7a:80:78:53,,ok,,
-lwap-89102-0170,70:DF:2F:74:93:14,bergruimte machines en vermogenapp.,,40:01:7a:12:c1:53,,ok,,
-lwap-89102-0190,18:80:90:25:FC:EC,"onderwijslab energie en automatisering, kant gang",,40:01:7a:80:56:01,,ok,,
-lwap-89102-01100,70:DF:2F:42:2A:90,"onderwijslab mechanische vormgevingstechnieken, kant liften",,40:01:7a:80:56:01,,ok,,
-lwap-89102-01191,00:27:E3:F1:8B:A4,"naast wc's, tegen plafond",,18:80:90:c6:a1:c3,,ok,,
-lwap-89102-0201,18:80:90:26:07:40,"landschapsbureau 2e, hoek printernis",,40:01:7a:80:7e:7c,,ok,,
-lwap-89102-0220,18:80:90:25:C2:BC,"onderwijslab kunststofvormgevingstech., muur andere kant station",,niet aanwezig,,niet aanwezig,,
-lwap-89102-0260,70:DF:2F:74:9D:04,onderwijslab mechanische meettechnieken,,40:01:7a:12:e8:83,,ok,,
-lwap-89102-0265,18:80:90:26:05:A0,"onderwijslab ICT, midden muur LCD",,40:01:7a:80:78:03,,ok,,
-lwap-89102-0280,00:27:E3:F1:8D:0C,"onderwijslab elektronica, kant tussendeur",,18:80:90:c6:a8:03,,ok,,
-lwap-89102-0285,70:DF:2F:42:2B:7C,"onderwijslab embedded software, rechtsboven doorgang IT lokaal",,40:01:7a:1c:09:23,,ok,,
-lwap-89102-02100,2C:5A:0F:0A:C2:38,"AP bovenop datakast geplaatst, rechtstreeks in poort",,f8:0b:cb:3d:80:63,,ok,,
-lwap-89102-0301-1,00:2C:C8:60:FA:F4,"aula, kant foyer",,00:2c:c8:8b:e2:53,,ok,,
-lwap-89102-0301-2,00:2C:C8:EA:37:E8,"aula, kant raam",,00:2c:c8:e9:3b:21,,ok,,
-lwap-89102-0301-3,00:2C:C8:61:D7:98,"aula, kant projectiescherm",,00:2c:c8:6a:ad:c1,,ok,,
-lwap-89102-0305,70:DF:2F:1D:1E:0C,"foyer aula, boven plafond zitbank",,40:01:7a:14:0f:c3,,ok,,
-lwap-89102-0350-1,08:96:AD:B0:36:00,"AP 1 cafetaria, kant zitbank tov keuken",,00:2c:c8:ed:dc:23,,ok,,
-lwap-89102-0350-2,00:2C:C8:EA:32:34,"AP 2 cafetaria, kant keuken",,00:2c:c8:19:24:d3,,ok,,
-lwap-89102-0350-3,00:2C:C8:61:CF:C4,"AP 3 cafetaria, doorgang buitenterras",,00:2c:c8:6a:8f:03,,ok,,
-lwap-89102-0350-4,2C:5A:0F:0A:12:3C,"AP 4 cafetaria, kant liften",,2c:5a:0f:09:a9:a3,,ok,,
-lwap-89102-03189,00:A7:42:87:79:30,"gang 3e, kant parking",,00:a7:42:8e:88:c3,,ok,,
-lwap-89102-0401,70:DF:2F:1D:1B:54,grote pc klas achter boven,,40:01:7a:14:04:f3,,ok,,
-lwap-89102-0410,70:DF:2F:1D:19:14,kleine pc klas vooraan boven bord,,40:01:7a:13:fc:03,,ok,,
-lwap-89102-0420,A0:23:9F:DA:8C:4C,klas medium 1,,18:80:90:dc:c8:23,,ok,,
-lwap-89102-0450,70:DF:2F:42:2B:30,klas small 1,,40:01:7a:1c:08:23,,ok,,
-lwap-89102-0460,70:DF:2F:1D:1E:18,onderzoekslokaal kine,,40:01:7a:14:10:33,,ok,,
-lwap-89102-0470,00:A7:42:87:7A:30,"groot praktijklokaal kinÃ©, hoek secretariaat",,00:a7:42:8e:90:d3,,ok,,
-lwap-89102-0480,70:DF:2F:42:2B:C4,AP praktijklokaal kinÃ©,,40:01:7a:1c:0a:73,,ok,,
-lwap-89102-04184-1,2C:33:11:23:E7:4C,"AP 1 secretariaat, tussen 4.174/4.170",,00:2c:c8:f0:fa:c3,,ok,,
-lwap-89102-04184-2,08:96:AD:B0:31:2C,"AP 2 secretariaat, tussen 4.110/4.118",,00:2c:c8:ed:c9:23,,ok,,
-lwap-89102-0501,70:DF:2F:5D:CC:38,"lab fysica, midden plafond",,70:df:2f:e2:06:a3,,todo,,
-lwap-89102-0510,70:DF:2F:5D:CD:48,"klas medium, vooraan",,niet aanwezig,,niet aanwezig,,
-lwap-89102-0520,70:DF:2F:5D:CC:30,"klas medium, aan ingang",,70:df:2f:e2:06:83,,ok,,
-lwap-89102-0540,00:27:E3:49:68:DC,"klas medium, aan ingang",,70:df:2f:ec:16:43,,ok,,
-lwap-89102-0560,70:DF:2F:42:29:48,"lab microbiologie, muur tov kant station",,niet aanwezig,,niet aanwezig,,
-lwap-89102-0570,70:DF:2F:D3:60:58,"lab organische chemie, naast deur",,40:01:7a:55:84:73,,ok,,
-lwap-89102-0580,A0:23:9F:DA:8A:34,"lab algemene chemie, muur tov kant station",,18:80:90:dc:bf:b3,,ok,,
-lwap-89102-0590,00:27:E3:9E:9C:60,"lab instrumentele chemie, muur kant station",,70:df:2f:e7:b5:63,,ok,,
-lwap-89102-0601,00:27:E3:9E:A8:38,"klas large, nis",,70:df:2f:e7:e4:73,,ok,,
-lwap-89102-0610,70:DF:2F:5D:CD:4C,"klas medium 5, naast ingang",,70:df:2f:e2:0a:f3,,ok,,
-lwap-89102-0620-1,00:27:E3:84:E3:04,"leercentrum, naast ingang, links van nis",,70:df:2f:ec:16:53,,ok,,
-lwap-89102-0620-2,00:27:E3:49:68:E0,"leercentrum, naast ingang, rechts van nis",,70:df:2f:ec:c3:43,,ok,,
-lwap-89102-0640,00:27:E3:06:19:04,"klas medium 6, achter",,70:df:2f:7b:8e:63,,ok,,
-lwap-89102-0650,00:27:E3:5E:2D:AC,"klas medium 7, naast deur",,70:df:2f:34:dc:53,,ok,,
-lwap-89102-0660,70:DF:2F:42:2A:6C,"klas small 3, naast deur",,40:01:7a:1c:05:23,,ok,,
-lwap-89102-0670,00:27:E3:84:E3:88,"klas small 4, naast deur",,70:df:2f:ec:c5:43,,ok,,
-lwap-89102-0690,2C:5A:0F:0A:C2:CC,groepswerkruimte,,f8:0b:cb:3d:82:a3,,ok,,wel in 6.80
+	Aanduiding	MAC WAN	locatiebeschrijving	MAC AP	op kaart	location id	
+1	lwap-89102-0015	18:80:90:26:07:68	onderwijslab bouwkunde, muur kant station	40:01:7a:80:7f:13	ok	000	
+2	lwap-89102-0040	70:DF:2F:74:9A:F4	onderzoekslab recycon	40:01:7a:12:e0:74	ok	001	
+3	lwap-89102-0050	00:A7:42:87:79:7C	onderzoekslab omgevingstechnieken	00:a7:42:8e:8b:33	ok	002	
+4	lwap-89102-0070	2C:5A:0F:0A:C3:FC	opslag bulk en puin	f8:0b:cb:3d:87:63	ok	003	
+5	lwap-89102-00102	70:DF:2F:74:9E:18	naast toiletten inkom, boven plafond	40:01:7a:12:ec:d3	ok	004	
+6	lwap-89102-00192-1	00:2C:C8:EA:31:F4	inkomhal, rechts van trappengang	00:2c:c8:f1:36:d2	ok	005	
+7	lwap-89102-00192-2	2C:33:11:23:F6:64	inkomhal, links van trappengang	00:2c:c8:ep:23:79	ok	006	
+8	lwap-89102-0101	70:DF:2F:1D:1C:1C	AP landschapskantoor 1e, midden vergaderzalen	40:01:7a:14:08:03	ok	100	
+9	lwap-89102-0120	70:DF:2F:1D:1B:64	onderwijslab mechanische structuren en vibro akoestiek	40:01:7a:14:05:33	ok	101	
+10	lwap-89102-0150	18:80:90:26:05:B4	onderwijslab aandrijf en energietechnieken	40:01:7a:80:78:53	ok	102	
+11	lwap-89102-0170	70:DF:2F:74:93:14	bergruimte machines en vermogenapp.	40:01:7a:12:c1:53	ok	103	
+12	lwap-89102-0190	18:80:90:25:FC:EC	onderwijslab energie en automatisering, kant gang	40:01:7a:80:56:01	ok	104	
+13	lwap-89102-01100	70:DF:2F:42:2A:90	onderwijslab mechanische vormgevingstechnieken, kant liften	40:01:7a:80:56:01	ok	105	
+14	lwap-89102-01191	00:27:E3:F1:8B:A4	naast wc's, tegen plafond	18:80:90:c6:a1:c3	ok	106	
+15	lwap-89102-0201	18:80:90:26:07:40	landschapsbureau 2e, hoek printernis	40:01:7a:80:7e:7c	ok	200	
+16	lwap-89102-0260	70:DF:2F:74:9D:04	onderwijslab mechanische meettechnieken	40:01:7a:12:e8:83	ok	201	
+17	lwap-89102-0265	18:80:90:26:05:A0	onderwijslab ICT, midden muur LCD	40:01:7a:80:78:03	ok	202	
+18	lwap-89102-0280	00:27:E3:F1:8D:0C	onderwijslab elektronica, kant tussendeur	18:80:90:c6:a8:03	ok	203	
+19	lwap-89102-0285	70:DF:2F:42:2B:7C	onderwijslab embedded software, rechtsboven doorgang IT lokaal	40:01:7a:1c:09:23	ok	204	
+20	lwap-89102-02100	2C:5A:0F:0A:C2:38	AP bovenop datakast geplaatst, rechtstreeks in poort	f8:0b:cb:3d:80:63	ok	205	
+21	lwap-89102-0301-1	00:2C:C8:60:FA:F4	aula, kant foyer	00:2c:c8:8b:e2:53	ok	300	
+22	lwap-89102-0301-2	00:2C:C8:EA:37:E8	aula, kant raam	00:2c:c8:e9:3b:21	ok	301	
+23	lwap-89102-0301-3	00:2C:C8:61:D7:98	aula, kant projectiescherm	00:2c:c8:6a:ad:c1	ok	302	
+24	lwap-89102-0305	70:DF:2F:1D:1E:0C	foyer aula, boven plafond zitbank	40:01:7a:14:0f:c3	ok	303	
+25	lwap-89102-0350-1	08:96:AD:B0:36:00	AP 1 cafetaria, kant zitbank tov keuken	00:2c:c8:ed:dc:23	ok	304	
+26	lwap-89102-0350-2	00:2C:C8:EA:32:34	AP 2 cafetaria, kant keuken	00:2c:c8:19:24:d3	ok	305	
+27	lwap-89102-0350-3	00:2C:C8:61:CF:C4	AP 3 cafetaria, doorgang buitenterras	00:2c:c8:6a:8f:03	ok	306	
+28	lwap-89102-0350-4	2C:5A:0F:0A:12:3C	AP 4 cafetaria, kant liften	2c:5a:0f:09:a9:a3	ok	307	
+29	lwap-89102-03189	00:A7:42:87:79:30	gang 3e, kant parking	00:a7:42:8e:88:c3	ok	308	
+30	lwap-89102-0401	70:DF:2F:1D:1B:54	grote pc klas achter boven	40:01:7a:14:04:f3	ok	400	
+31	lwap-89102-0410	70:DF:2F:1D:19:14	kleine pc klas vooraan boven bord	40:01:7a:13:fc:03	ok	401	
+32	lwap-89102-0420	A0:23:9F:DA:8C:4C	klas medium 1	18:80:90:dc:c8:23	ok	402	
+33	lwap-89102-0450	70:DF:2F:42:2B:30	klas small 1	40:01:7a:1c:08:23	ok	403	
+34	lwap-89102-0460	70:DF:2F:1D:1E:18	onderzoekslokaal kine	40:01:7a:14:10:33	ok	404	
+35	lwap-89102-0470	00:A7:42:87:7A:30	groot praktijklokaal kiné, hoek secretariaat	00:a7:42:8e:90:d3	ok	405	
+36	lwap-89102-0480	70:DF:2F:42:2B:C4	AP praktijklokaal kiné	40:01:7a:1c:0a:73	ok	406	
+37	lwap-89102-04184-1	2C:33:11:23:E7:4C	AP 1 secretariaat, tussen 4.174/4.170	00:2c:c8:f0:fa:c3	ok	407	
+38	lwap-89102-04184-2	08:96:AD:B0:31:2C	AP 2 secretariaat, tussen 4.110/4.118	00:2c:c8:ed:c9:23	ok	408	
+39	lwap-89102-0501	70:DF:2F:5D:CC:38	lab fysica, midden plafond	70:df:2f:e2:06:a3	todo	500	
+40	lwap-89102-0520	70:DF:2F:5D:CC:30	klas medium, aan ingang	70:df:2f:e2:06:83	ok	501	
+41	lwap-89102-0540	00:27:E3:49:68:DC	klas medium, aan ingang	70:df:2f:ec:16:43	ok	502	
+42	lwap-89102-0570	70:DF:2F:D3:60:58	lab organische chemie, naast deur	40:01:7a:55:84:73	ok	503	
+43	lwap-89102-0580	A0:23:9F:DA:8A:34	lab algemene chemie, muur tov kant station	18:80:90:dc:bf:b3	ok	504	
+44	lwap-89102-0590	00:27:E3:9E:9C:60	lab instrumentele chemie, muur kant station	70:df:2f:e7:b5:63	ok	506	
+45	lwap-89102-0601	00:27:E3:9E:A8:38	klas large, nis	70:df:2f:e7:e4:73	ok	507	
+46	lwap-89102-0610	70:DF:2F:5D:CD:4C	klas medium 5, naast ingang	70:df:2f:e2:0a:f3	ok	508	
+47	lwap-89102-0620-1	00:27:E3:84:E3:04	leercentrum, naast ingang, links van nis	70:df:2f:ec:16:53	ok	600	
+48	lwap-89102-0620-2	00:27:E3:49:68:E0	leercentrum, naast ingang, rechts van nis	70:df:2f:ec:c3:43	ok	601	
+49	lwap-89102-0640	00:27:E3:06:19:04	klas medium 6, achter	70:df:2f:7b:8e:63	ok	602	
+50	lwap-89102-0650	00:27:E3:5E:2D:AC	klas medium 7, naast deur	70:df:2f:34:dc:53	ok	603	
+51	lwap-89102-0660	70:DF:2F:42:2A:6C	klas small 3, naast deur	40:01:7a:1c:05:23	ok	604	
+52	lwap-89102-0670	00:27:E3:84:E3:88	klas small 4, naast deur	70:df:2f:ec:c5:43	ok	605	
+53	lwap-89102-0690	2C:5A:0F:0A:C2:CC	groepswerkruimte	f8:0b:cb:3d:82:a3	ok	606	wel in 6.80
+							
+							
+							
+	lwap-89102-0088	00:2C:C8:EA:D1:C0	technisch lokaal vitale delen	niet aanwezig	niet aanwezig		
+	lwap-89102-0220	18:80:90:25:C2:BC	onderwijslab kunststofvormgevingstech., muur andere kant station	niet aanwezig	niet aanwezig		
+	lwap-89102-0510	70:DF:2F:5D:CD:48	klas medium, vooraan	niet aanwezig	niet aanwezig		
+	lwap-89102-0560	70:DF:2F:42:29:48	lab microbiologie, muur tov kant station	niet aanwezig	niet aanwezig		

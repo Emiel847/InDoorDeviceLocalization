@@ -11,12 +11,21 @@ UARTSerial *_serial;
 ATCmdParser *_parser;
 
 //chipselect WIFI module
-//DigitalOut wifi_enable(D9);
+//DigitalOut cs_WIFI(D9);
+//DigitalOut cs_WIFI_RST(A2); TODO: chipselect does not work when declearing pins :O
 
 StringOperations so;
 
+enum chips{
+    OFF = 0,
+    WIFI,
+    LORA
+};
+
+int init(void);
+
 int main()
-{   
+{  
     printf("Device location version %s\n\r",VERSION);
     printf("List of known AP's\n\r");
     
@@ -24,19 +33,22 @@ int main()
     {
         printf("location: %s => MAC: %s.\n\r", location[i], macs[i]);
     }
-
-    _serial = new UARTSerial(D1, D0, ESP8266_DEFAULT_BAUD_RATE);
-    _parser = new ATCmdParser(_serial);
-    _parser->debug_on( 0 );
-    _parser->set_delimiter( "\r\n" );
     
+    if(init() < 0)
+    {
+        printf("Error: something whent rong in init function.\n\r");
+        return -1;
+    }
+        
     char** tokens;
     
     while(1)
     {
         //Get a List of available AP's
-        _parser->send("AT+CWLAP=\"campusroam\"");    
+        //disable wifi module 
+        //chipSelect(WIFI);  
         //_parser->send("AT+CWLAP=\"telenet-C32F3A2\""); // request
+        _parser->send("AT+CWLAP=\"campusroam\""); 
         int i = 0;
         char buffer[3000];
         bool isOk = false;
@@ -49,6 +61,10 @@ int main()
             }
             i++;
         }
+        
+        //disable wifi module
+        //chipSelect(OFF);  
+        
         //split the buffer
         int size = 0;
         tokens = so.split(buffer, ',', &size);
@@ -79,6 +95,16 @@ int main()
                     if(strcmp(macs[device],tokens[3 + (6*AP)]) == 0)
                     {
                         printf("Location ID: %s\n\r",location[device]);
+                        
+                       /*  -------------------------------------------------------------------------  */                                                             
+                       //      ____  _____ _   _ ____    _____ ___    _     ___  ____     _           //
+                       //     / ___|| ____| \ | |  _ \  |_   _/ _ \  | |   / _ \|  _ \   / \          //
+                       //     \___ \|  _| |  \| | | | |   | || | | | | |  | | | | |_) | / _ \         //
+                       //      ___) | |___| |\  | |_| |   | || |_| | | |__| |_| |  _ < / ___ \        //
+                       //     |____/|_____|_| \_|____/    |_| \___/  |_____\___/|_| \_/_/   \_\       //
+                       //                                                                             //
+                       /*  -------------------------------------------------------------------------  */
+                        
                         break;
                     }
                 }
@@ -100,4 +126,38 @@ int main()
     }
     
     return 0; //OKE
+}
+
+int init(void)
+{
+    //activate module
+    //cs_WIFI = 1;
+    //wait(5);
+    //cs_WIFI_RST = 1;
+    
+    //activate UART and AT paser
+    _serial = new UARTSerial(D1, D0, ESP8266_DEFAULT_BAUD_RATE);
+    if( _serial != NULL)
+    {
+        _parser = new ATCmdParser(_serial);
+        
+        if(_parser != NULL)
+        {
+            _parser->debug_on( 0 );
+            _parser->set_delimiter( "\r\n" );
+        }
+        else
+        {
+            printf("Error (init): Can not link ATcmd.\n\r");
+            return -1;
+        }
+    }
+    else
+    {
+        printf("Error (init): Can not link UART.\n\r");
+        return -1;
+    }
+    
+    return 0; //OKE
+
 }

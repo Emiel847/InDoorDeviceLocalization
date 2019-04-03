@@ -51,7 +51,7 @@
 		function get()
 		{
 			$.ajax({
-			  	url: "http://172.16.101.72:9000",
+			  	url: "http://10.46.178.0:8080",//HARDCODE THIS IP ADRRESS
 				success: function(data)
 				{
 					var ap = data.accesPoint;
@@ -59,6 +59,7 @@
 					
 					$(".verdiep").css("visibility", "hidden" );
 					$(".verdiep" + verdiep).css("visibility", "visible" );
+					$(".kaartNummer").text("verdieping "+verdiep);
 					
 					$(".point").css("visibility", "hidden" );
 					
@@ -89,8 +90,35 @@
 	</script>
 </head>
 <body>
-	<h1 class="hoofd">My data: </h1>
+	<h1>Kaart voor tovenaars </h1>
+	<h2 class="kaartNummer"></h1>
 		<div class="content">
+			<div class="verdiep0 verdiep">
+				<img src="res/v0.jpg" alt="kaart verdiep 0">
+				<i class="point 0 fas fa-wifi fa-3x" style="left: 75% ; top: 17%"><div></div></i>
+				<i class="point 1 fas fa-wifi fa-3x" style="left: 41%; top: 15%"><div></div></i>
+				<i class="point 2 fas fa-wifi fa-3x" style="left: 35%; top: 54%"><div></div></i>
+				<i class="point 3 fas fa-wifi fa-3x" style="left: 8% ; top: 17%"><div></div></i>
+				<i class="point 4 fas fa-wifi fa-3x" style="left: 53%; top: 90%"><div></div></i>
+				<i class="point 5 fas fa-wifi fa-3x" style="left: 76%; top: 56%"><div></div></i>
+				<i class="point 6 fas fa-wifi fa-3x" style="left: 76%; top: 78%"><div></div></i>
+				<i class="point 7 fas fa-wifi fa-3x" style="left: 79%; top: 78%"><div></div></i>
+				<i class="point 8 fas fa-wifi fa-3x" style="left: 42%; top: 40%"><div></div></i>
+				<i class="point 9 fas fa-wifi fa-3x" style="left: 55.5%; top: 69%"><div></div></i>
+				<i class="point 10 fas fa-wifi fa-3x" style="left: 42%; top: 40%"><div></div></i>
+			</div>
+			<div class="verdiep1 verdiep">
+				<img src="res/v1.jpg" alt="kaart verdiep 1">
+				<i class="point 0 fas fa-wifi fa-3x" style="left: 87% ; top: 69%"><div></div></i>
+				<i class="point 1 fas fa-wifi fa-3x" style="left: 90%; top: 10%"><div></div></i>
+				<i class="point 2 fas fa-wifi fa-3x" style="left: 55%; top: 14%"><div></div></i>
+				<i class="point 3 fas fa-wifi fa-3x" style="left: 36% ; top: 57%"><div></div></i>
+				<i class="point 4 fas fa-wifi fa-3x" style="left: 18%; top: 52%"><div></div></i>
+				<i class="point 5 fas fa-wifi fa-3x" style="left: 23%; top: 17%"><div></div></i>
+				<i class="point 6 fas fa-wifi fa-3x" style="left: 55%; top: 82%"><div></div></i>
+				<i class="point 7 fas fa-wifi fa-3x" style="left: 18% ; top: 39%"><div></div></i>
+				<i class="point 8 fas fa-wifi fa-3x" style="left: 18%; top: 39%"><div></div></i>
+			</div>
 			<div class="verdiep2 verdiep">
 				<img src="res/v2.jpg" alt="kaart verdiep 2">
 				<i class="point 0 fas fa-wifi fa-3x" style="left: 87% ; top: 78%"><div></div></i>
@@ -102,8 +130,8 @@
 				<i class="point 6 fas fa-wifi fa-3x" style="left: 78%; top: 60%"><div></div></i>
 			</div>
 			
-			<div class="verdiep3 verdiep">
-				<img src="res/v3.jpg" alt="kaart verdiep 2">
+			<div class="verdiep3 verdiep"> //TODO
+				<img src="res/v3.jpg" alt="kaart verdiep 3">
 				<div class="point 0 fas fa-wifi fa-3x" style="left: 250px; top: 50px"><div></div></div>
 				<div class="point 1 fas fa-wifi fa-3x" style="left: 300px; top: 100px"><div></div></div>
 				<div class="point 2 fas fa-wifi fa-3x" style="left: 350px; top: 150px"><div></div></div>

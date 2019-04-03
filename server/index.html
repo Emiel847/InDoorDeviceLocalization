@@ -61,13 +61,12 @@
 					$(".verdiep").css("visibility", "hidden" );
 					$(".verdiep" + verdiep).css("visibility", "visible" );
 					
-					
 					$(".point").css("visibility", "hidden" );
 					
-					$( ".verdiep"+verdiep+">"+"."+ap ).css("visibility", "visible");//".verdiep"+verdiep+">"
+					$( ".verdiep"+verdiep+">"+"."+ap ).css("visibility", "visible");
 					
 					var localTime = moment.utc(data.utcTime).format('LLL')+" (utc)";
-					$("." + ap + ">" + "div").text(localTime);
+					$("." + ap + ">" + "div").text(localTime+"\n"+data.devId);
 				}});
 		}
 
@@ -95,9 +94,13 @@
 		<div class="content">
 			<div class="verdiep2 verdiep">
 				<img src="res/v2.jpg" alt="kaart verdiep 2">
-				<i class="point 0 fas fa-wifi fa-3x" style="left: 50px; top: 50px"><div></div></i>
-				<i class="point 1 fas fa-wifi fa-3x" style="left: 100px; top: 100px"><div></div></i>
-				<i class="point 2 fas fa-wifi fa-3x" style="left: 150px; top: 150px"><div></div></i>
+				<i class="point 0 fas fa-wifi fa-3x" style="left: 87% ; top: 78%"><div></div></i>
+				<i class="point 1 fas fa-wifi fa-3x" style="left: 46%; top: 18%"><div></div></i>
+				<i class="point 2 fas fa-wifi fa-3x" style="left: 45%; top: 70%"><div></div></i>
+				<i class="point 3 fas fa-wifi fa-3x" style="left: 24% ; top: 70%"><div></div></i>
+				<i class="point 4 fas fa-wifi fa-3x" style="left: 9%; top: 70%"><div></div></i>
+				<i class="point 5 fas fa-wifi fa-3x" style="left: 13%; top: 18%"><div></div></i>
+				<i class="point 6 fas fa-wifi fa-3x" style="left: 78%; top: 60%"><div></div></i>
 			</div>
 			
 			<div class="verdiep3 verdiep">

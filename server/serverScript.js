@@ -1,7 +1,9 @@
-
 var http = require('http');
+var express = require('express');
+var app = express();
+var fs = require('fs');
 var ttn = require('ttn');
-
+//var images = require("images");
 
 var appId = 'projlab_2tst';
 var accessKey = 'ttn-account-v2.k-UdLimcxHKDoXLKitj-ryjzMzx4hYVA2urPGr9LP2M';
@@ -12,7 +14,6 @@ var client = new ttn.DataClient(appId, accessKey, 'eu.thethings.network:1883');
 //client.on('uplink', function (msg) { console.log('Received message', msg);});
 
 var output = {utcTime:"", verdiep:0, accesPoint:0, devId:""};
-
 client.on("uplink", function (devId, payload) {
     console.log("*** Received uplink from*** ", devId)
 	console.log(payload)
@@ -28,7 +29,13 @@ client.on("uplink", function (devId, payload) {
 	console.log("accesPoint ", output.accesPoint);
 	console.log("devId ", output.devId);
     console.log()
-})
+});
+
+app.use(express.static(__dirname));
+app.get('*', function(req, res){
+
+  });
+app.listen(9000);
 
 http.createServer(function (req, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');

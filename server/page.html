@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<style type="text/css">
+		.point{
+			position: absolute;
+			visibility : hidden;
+			border-radius: 25px;
+			height: 25px;
+			width: 25px;
+			background-color: #46CFEA;
+		}
+		img{
+			visibility : hidden;
+		}
+		div {
+			border: thick solid red;
+		}
+
+	</style>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
+	<script type="text/javascript">
+	
+		function get()
+		{
+			$.ajax({
+			  	url: "http://127.0.0.1:8080/",
+				success: function(data)
+				{
+
+					var localTime = moment.utc(data.utcTime).format('LLL')+" (utc)";
+
+					$("."+data.accesPoint).css("visibility", "visible");
+					$("."+data.accesPoint).text(localTime);
+				}});
+		}
+
+		setInterval(function(){ get(); }, 500);
+		/*
+		$(document).ready(function(){
+			
+				$(".point").css("visibility", "hidden" );
+				$(".1").css("visibility", "visible" );
+				$(".2").css("visibility", "visible" );
+				$(".0").css("visibility", "visible" );
+				
+			//$(".point").css("visibility", "visible" );
+			
+		})
+		
+		function myFunction() {
+			var x = document.getElementsByClassName("hoofd");
+			x[0].innerHTML = "Hello World!";
+		}*/
+	</script>
+</head>
+<body>
+	<h1 class="hoofd">My data: </h1>
+		<div class="content">
+			<div class="verdiep2">
+			<img src="res/verdiep2.png" alt="kaart verdiep 2">
+			<div class="point 0" style="left: 50px; top: 50px"></div>
+			<div class="point 1" style="left: 100px; top: 100px"></div>
+			<div class="point 2" style="left: 150px; top: 150px"></div>
+			
+			<div class="verdiep2">
+			<img src="res/verdiep2.png" alt="kaart verdiep 2">
+			<div class="point 0" style="left: 50px; top: 50px"></div>
+			<div class="point 1" style="left: 100px; top: 100px"></div>
+			<div class="point 2" style="left: 150px; top: 150px"></div>
+		</div>
+	</div>
+	
+	
+</body>
+</html>

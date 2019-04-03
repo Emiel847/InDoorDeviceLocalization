@@ -10,9 +10,11 @@
 			width: 25px;
 			background-color: #46CFEA;
 		}
-		img{
-			visibility : hidden;
+		.verdiep{
+			visibility: hidden;
+			position: absolute;
 		}
+		
 		div {
 			border: thick solid red;
 		}
@@ -28,11 +30,19 @@
 			  	url: "http://127.0.0.1:8080/",
 				success: function(data)
 				{
-
+					var ap = data.accesPoint;
+					var verdiep = data.verdiep;
+					
+					$(".verdiep").css("visibility", "hidden" );
+					$(".verdiep" + verdiep).css("visibility", "visible" );
+					
+					
+					$(".point").css("visibility", "hidden" );
+					
+					$( ".verdiep"+verdiep+">"+"."+ap ).css("visibility", "visible");//".verdiep"+verdiep+">"
+					
 					var localTime = moment.utc(data.utcTime).format('LLL')+" (utc)";
-
-					$("."+data.accesPoint).css("visibility", "visible");
-					$("."+data.accesPoint).text(localTime);
+					$("." + ap).text(localTime);
 				}});
 		}
 
@@ -58,20 +68,20 @@
 <body>
 	<h1 class="hoofd">My data: </h1>
 		<div class="content">
-			<div class="verdiep2">
-			<img src="res/verdiep2.png" alt="kaart verdiep 2">
-			<div class="point 0" style="left: 50px; top: 50px"></div>
-			<div class="point 1" style="left: 100px; top: 100px"></div>
-			<div class="point 2" style="left: 150px; top: 150px"></div>
+			<div class="verdiep2 verdiep">
+				<img src="res/v2.jpg" alt="kaart verdiep 2">
+				<div class="point 0" style="left: 50px; top: 50px"></div>
+				<div class="point 1" style="left: 100px; top: 100px"></div>
+				<div class="point 2" style="left: 150px; top: 150px"></div>
+			</div>
 			
-			<div class="verdiep2">
-			<img src="res/verdiep2.png" alt="kaart verdiep 2">
-			<div class="point 0" style="left: 50px; top: 50px"></div>
-			<div class="point 1" style="left: 100px; top: 100px"></div>
-			<div class="point 2" style="left: 150px; top: 150px"></div>
+			<div class="verdiep3 verdiep">
+				<img src="res/v3.jpg" alt="kaart verdiep 2">
+				<div class="point 0" style="left: 250px; top: 50px"></div>
+				<div class="point 1" style="left: 300px; top: 100px"></div>
+				<div class="point 2" style="left: 350px; top: 150px"></div>
+			</div>
 		</div>
-	</div>
-	
 	
 </body>
 </html>

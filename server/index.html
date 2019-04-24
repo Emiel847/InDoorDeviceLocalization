@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+	<title>Kaart KULeuven</title>
 	<style type="text/css">
 		@keyframes example {
 			0% { transform: scale(1); 
@@ -60,7 +61,7 @@
 		}
 		
 		html{
-			cursor: url(toverstaf.png), auto;
+			cursor: url(res/toverstaf.png), auto;
 		}
 		
 	</style>
@@ -79,15 +80,17 @@
 					var verdiep = data.verdiep;
 					
 					$(".verdiep").css("visibility", "hidden" );
-					$(".verdiep" + verdiep).css("visibility", "visible" );
-					$(".kaartNummer").text("verdieping "+verdiep);
-					
 					$(".point").css("visibility", "hidden" );
+					$(".verdiep" + verdiep).css("visibility", "visible" );
 					
-					$( ".verdiep"+verdiep+">"+"."+ap ).css("visibility", "visible");
-					
-					var localTime = moment.utc(data.utcTime).format('LLL')+" (utc)";
-					$("." + ap + ">" + "div").text(localTime+"\n"+data.devId);
+					if(ap != 255 && verdiep != 255){
+						$( ".verdiep"+verdiep+">"+"."+ap ).css("visibility", "visible");
+						var localTime = moment.utc(data.utcTime).format('LLL')+" (utc)";
+						$("." + ap + ">" + "div").text(localTime+"\n"+data.devId);
+						$(".kaartNummer").text("verdieping "+verdiep);
+					}else{
+						$(".kaartNummer").text("Het device '"+data.devId+"' is verloren.");
+					}
 				}});
 		}
 
@@ -173,6 +176,9 @@
 				<i class="point 6 fas fa-wifi fa-3x" style="left: 14%; top: 30%"><div></div></i>
 				<i class="point 7 fas fa-wifi fa-3x" style="left: 14%; top:  5%"><div></div></i>
 				<i class="point 8 fas fa-wifi fa-3x" style="left: 30%; top:  5%"><div></div></i>
+			</div>
+			<div class="verdiep255 verdiep">
+				<img src="res/KULeuvenBrugge.png" alt="foto campus KU Leuven brugge">
 			</div>
 		</div>
 	

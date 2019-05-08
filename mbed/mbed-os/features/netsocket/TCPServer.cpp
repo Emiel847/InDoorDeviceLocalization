@@ -38,7 +38,7 @@ nsapi_error_t TCPServer::accept(TCPSocket *connection, SocketAddress *address)
             break;
         }
 
-        core_util_atomic_flag_clear(&_pending);
+        _pending = 0;
         void *socket;
         ret = _stack->socket_accept(_socket, &socket, address);
 

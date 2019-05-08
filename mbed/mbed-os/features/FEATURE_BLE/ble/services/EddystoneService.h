@@ -25,8 +25,6 @@
 #include "Ticker.h"
 #include "Timeout.h"
 
-#if BLE_FEATURE_GATT_SERVER
-
 static const uint8_t BEACON_EDDYSTONE[] = {0xAA, 0xFE};
 
 //Debug is disabled by default
@@ -655,7 +653,5 @@ public:
         }
     }
 };
-
-#endif // BLE_FEATURE_GATT_SERVER
 
 #endif  // SERVICES_EDDYSTONEBEACON_H_

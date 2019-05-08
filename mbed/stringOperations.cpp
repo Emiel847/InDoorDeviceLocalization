@@ -2,6 +2,8 @@
 
 // information about StringOperations => stringOperations.h!
 
+Serial myUart(D1,D0,9600);
+
 StringOperations::StringOperations()
 {
 }

@@ -19,8 +19,6 @@
 
 #include "ble/Gap.h"
 
-#if BLE_FEATURE_GATT_SERVER
-
 /**
 * @class LinkLossService
 * @brief This service defines behavior when a link is lost between two devices.
@@ -103,7 +101,5 @@ protected:
 
     ReadWriteGattCharacteristic<uint8_t> alertLevelChar;
 };
-
-#endif // BLE_FEATURE_GATT_SERVER
 
 #endif /* __BLE_LINK_LOSS_SERVICE_H__ */

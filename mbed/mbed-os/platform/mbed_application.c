@@ -89,24 +89,21 @@ void mbed_start_application(uintptr_t address)
 
 static void powerdown_nvic()
 {
+    int isr_groups_32;
     int i;
     int j;
-    int isr_groups_32;
 
 #if defined(__CORTEX_M23)
     // M23 doesn't support ICTR and supports up to 240 external interrupts.
     isr_groups_32 = 8;
-#elif defined(__CORTEX_M0PLUS)
-    isr_groups_32 = 1;
 #else
     isr_groups_32 = ((SCnSCB->ICTR & SCnSCB_ICTR_INTLINESNUM_Msk) >> SCnSCB_ICTR_INTLINESNUM_Pos) + 1;
 #endif
-
     for (i = 0; i < isr_groups_32; i++) {
         NVIC->ICER[i] = 0xFFFFFFFF;
         NVIC->ICPR[i] = 0xFFFFFFFF;
         for (j = 0; j < 8; j++) {
-#if defined(__CORTEX_M23) || defined(__CORTEX_M33)
+#if defined(__CORTEX_M23)
             NVIC->IPR[i * 8 + j] = 0x00000000;
 #else
             NVIC->IP[i * 8 + j] = 0x00000000;
@@ -125,21 +122,21 @@ static void powerdown_scb(uint32_t vtor)
     SCB->AIRCR = 0x05FA | 0x0000;
     SCB->SCR = 0x00000000;
     // SCB->CCR     - Implementation defined value
-    int num_pri_reg; // Number of priority registers
-#if defined(__CORTEX_M0PLUS) || defined(__CORTEX_M23)
-    num_pri_reg = 2;
+#if defined(__CORTEX_M23)
+    for (i = 0; i < 2; i++) {
+        SCB->SHPR[i] = 0x00;
+    }
 #else
-    num_pri_reg = 12;
-#endif
-    for (i = 0; i < num_pri_reg; i++) {
-#if defined(__CORTEX_M7) || defined(__CORTEX_M23) || defined(__CORTEX_M33)
+    for (i = 0; i < 12; i++) {
+#if defined(__CORTEX_M7)
         SCB->SHPR[i] = 0x00;
 #else
         SCB->SHP[i] = 0x00;
 #endif
     }
+#endif
     SCB->SHCSR = 0x00000000;
-#if defined(__CORTEX_M23) || defined(__CORTEX_M0PLUS)
+#if defined(__CORTEX_M23)
 #else
     SCB->CFSR = 0xFFFFFFFF;
     SCB->HFSR = SCB_HFSR_DEBUGEVT_Msk | SCB_HFSR_FORCED_Msk | SCB_HFSR_VECTTBL_Msk;
@@ -161,7 +158,7 @@ static void powerdown_scb(uint32_t vtor)
 
 __asm static void start_new_application(void *sp, void *pc)
 {
-    MOVS R2, #0
+    MOV R2, #0
     MSR CONTROL, R2         // Switch to main stack
     MOV SP, R0
     MSR PRIMASK, R2         // Enable interrupts
@@ -173,7 +170,9 @@ __asm static void start_new_application(void *sp, void *pc)
 void start_new_application(void *sp, void *pc)
 {
     __asm volatile(
-        "movs   r2, #0      \n"
+        "movw   r2, #0      \n" // Fail to compile "mov r2, #0" with ARMC6. Replace with MOVW.
+        // We needn't "movt r2, #0" immediately following because MOVW
+        // will zero-extend the 16-bit immediate.
         "msr    control, r2 \n" // Switch to main stack
         "mov    sp, %0      \n"
         "msr    primask, r2 \n" // Enable interrupts

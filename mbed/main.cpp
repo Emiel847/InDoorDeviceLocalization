@@ -5,24 +5,24 @@
 //#include "debugLocation.h"
 #include "stringOperations.h"
 
-#define VERSION "v1.0"
+#define VERSION "v1.1"
 #define ESP8266_DEFAULT_BAUD_RATE   115200
+#define BUFFER_SIZE 3000
+#define ENABLE true
+#define DISABLE false
+#define delay_time 1
 UARTSerial *_serial;
 ATCmdParser *_parser;
 
 //chipselect WIFI module
-//DigitalOut cs_WIFI(D9);
-//DigitalOut cs_WIFI_RST(A2); TODO: chipselect does not work when declearing pins :O
+DigitalOut cs_WIFI(D10);
+DigitalOut cs_LORA(D9);
+DigitalOut cs_WIFI_RST(A3);
 
 StringOperations so;
 
-enum chips{
-    OFF = 0,
-    WIFI,
-    LORA
-};
-
 int init(void);
+void WIFI_module(bool isEnable);
 
 int main()
 {  
@@ -43,14 +43,19 @@ int main()
     char** tokens;
     
     while(1)
-    {
-        //Get a List of available AP's
+    {   ////////
+        // -> Get a List of available AP's
+        ////////
+        
         //disable wifi module 
-        //chipSelect(WIFI);  
-        //_parser->send("AT+CWLAP=\"telenet-C32F3A2\""); // request
-        _parser->send("AT+CWLAP=\"campusroam\""); 
+        WIFI_module(ENABLE);
+        
+        //sent AT request
+        _parser->send("AT+CWLAP=\"campusroam-2.4\""); 
+        
+        
         int i = 0;
-        char buffer[3000];
+        char buffer[BUFFER_SIZE];
         bool isOk = false;
         while(!isOk)
         {
@@ -63,8 +68,31 @@ int main()
         }
         
         //disable wifi module
-        //chipSelect(OFF);  
+        WIFI_module(DISABLE);
         
+        //remove bad chars from begin of ths string
+        int i_find = 0;
+        bool ready = false;
+        char *p = buffer;
+        while (ready == false)
+        {
+            //find start of string...
+            if (buffer[i_find] == '+' && buffer[i_find+1] == 'C' && buffer[i_find+2] == 'W')
+            {
+                ready = true;
+                i = i - i_find;
+                strcpy(buffer, p + i_find);
+            }
+            else if(i_find >= BUFFER_SIZE)
+            {
+                //nothing found, continue code... nothing happend...
+                ready = true; 
+            }
+            else
+            {
+                i_find++;
+            }
+        }
         //split the buffer
         int size = 0;
         tokens = so.split(buffer, ',', &size);
@@ -130,10 +158,8 @@ int main()
 
 int init(void)
 {
-    //activate module
-    //cs_WIFI = 1;
-    //wait(5);
-    //cs_WIFI_RST = 1;
+    //enable Reset pin
+    cs_WIFI_RST = 1;
     
     //activate UART and AT paser
     _serial = new UARTSerial(D1, D0, ESP8266_DEFAULT_BAUD_RATE);
@@ -158,6 +184,23 @@ int init(void)
         return -1;
     }
     
+     //lora...
+    
     return 0; //OKE
 
+}
+
+
+void WIFI_module(bool isEnable)
+{
+    if(isEnable)
+    {
+        cs_WIFI = 1;
+        cs_LORA = 0; //prevent lora be enable!
+        wait(delay_time);
+    }
+    else
+    {
+        cs_WIFI = 0;
+    } 
 }

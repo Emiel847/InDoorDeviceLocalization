@@ -27,8 +27,6 @@
 #include "ble/UUID.h"
 #include "ble/BLE.h"
 
-#if BLE_FEATURE_GATT_SERVER
-
 extern const uint8_t  UARTServiceBaseUUID[UUID::LENGTH_OF_LONG_UUID];
 extern const uint16_t UARTServiceShortUUID;
 extern const uint16_t UARTServiceTXCharacteristicShortUUID;
@@ -216,7 +214,5 @@ protected:
                                            *   they'd read from in order to receive the bytes transmitted by this
                                            *   application. */
 };
-
-#endif // BLE_FEATURE_GATT_SERVER
 
 #endif /* #ifndef __BLE_UART_SERVICE_H__*/

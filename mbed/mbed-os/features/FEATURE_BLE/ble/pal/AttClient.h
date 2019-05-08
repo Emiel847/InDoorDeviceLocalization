@@ -17,7 +17,6 @@
 #ifndef BLE_PAL_ATTCLIENT_H_
 #define BLE_PAL_ATTCLIENT_H_
 
-#include "ble/common/StaticInterface.h"
 #include "ble/UUID.h"
 #include "ble/BLETypes.h"
 #include "ble/ArrayView.h"
@@ -40,15 +39,7 @@ namespace pal {
  *
  * @note see BLUETOOTH SPECIFICATION Version 5.0 | Vol 3, Part F
  */
-template<class Impl>
-struct AttClient : public StaticInterface<Impl, AttClient> {
-private:
-
-    using StaticInterface<Impl, ble::pal::AttClient>::impl;
-
-public:
-
-
+struct AttClient {
     /**
      * Initialization of the instance. An implementation can use this function
      * to initialise the subsystems needed to realize the ATT operations of this
@@ -59,9 +50,7 @@ public:
      * @return BLE_ERROR_NONE if the request has been successfully sent or the
      * appropriate error otherwise.
      */
-    ble_error_t initialize() {
-        return impl()->initialize_();
-    }
+    virtual ble_error_t initialize() = 0;
 
     /**
      * Termination of the instance. An implementation can use this function
@@ -74,9 +63,7 @@ public:
      * @return BLE_ERROR_NONE if the request has been successfully sent or the
      * appropriate error otherwise.
      */
-    ble_error_t terminate() {
-        return impl()->terminate_();
-    }
+    virtual ble_error_t terminate() = 0;
 
     /**
      * Send an exchange MTU request which negotiate the size of the MTU used by
@@ -102,9 +89,7 @@ public:
      *
      * @note see BLUETOOTH SPECIFICATION Version 5.0 | Vol 3, Part F Section 3.4.2.1
      */
-    ble_error_t exchange_mtu_request(connection_handle_t connection) {
-        return impl()->exchange_mtu_request_(connection);
-    }
+    virtual ble_error_t exchange_mtu_request(connection_handle_t connection) = 0;
 
     /**
      * Acquire the size of the mtu for a given connection.
@@ -117,12 +102,10 @@ public:
      * @return BLE_ERROR_NONE if the MTU size has been acquired or the
      * appropriate error otherwise.
      */
-    ble_error_t get_mtu_size(
+    virtual ble_error_t get_mtu_size(
         connection_handle_t connection_handle,
         uint16_t& mtu_size
-    ) {
-        return impl()->get_mtu_size_(connection_handle, mtu_size);
-    }
+    ) = 0;
 
     /**
      * Send a find information request to a server in order to obtain the
@@ -155,12 +138,10 @@ public:
      *
      * @note see BLUETOOTH SPECIFICATION Version 5.0 | Vol 3, Part F Section 3.4.3.1
      */
-    ble_error_t find_information_request(
+    virtual ble_error_t find_information_request(
         connection_handle_t connection_handle,
         attribute_handle_range_t discovery_range
-    ) {
-        return impl()->find_information_request_(connection_handle, discovery_range);
-    }
+    ) = 0;
 
     /**
      * Send a Find By Type Value Request which retrieve the handles of attributes
@@ -193,19 +174,12 @@ public:
      *
      * @note see BLUETOOTH SPECIFICATION Version 5.0 | Vol 3, Part F Section 3.4.3.3
      */
-    ble_error_t find_by_type_value_request(
+    virtual ble_error_t find_by_type_value_request(
         connection_handle_t connection_handle,
         attribute_handle_range_t discovery_range,
         uint16_t type,
         const ArrayView<const uint8_t>& value
-    ) {
-        return impl()->find_by_type_value_request_(
-            connection_handle,
-            discovery_range,
-            type,
-            value
-        );
-    }
+    ) = 0;
 
     /**
      * Send a Read By Type Request used to obtain the values of attributes where
@@ -244,13 +218,11 @@ public:
      *
      * @note see BLUETOOTH SPECIFICATION Version 5.0 | Vol 3, Part F Section 3.4.4.1
      */
-    ble_error_t read_by_type_request(
+    virtual ble_error_t read_by_type_request(
         connection_handle_t connection_handle,
         attribute_handle_range_t read_range,
         const UUID& type
-    ) {
-        return impl()->read_by_type_request_(connection_handle, read_range, type);
-    }
+    ) = 0;
 
     /**
      * Send a Read Request to read the value of an attribute in the server.
@@ -285,12 +257,10 @@ public:
      *
      * @note see BLUETOOTH SPECIFICATION Version 5.0 | Vol 3, Part F Section 3.4.4.3
      */
-    ble_error_t read_request(
+    virtual ble_error_t read_request(
         connection_handle_t connection_handle,
         attribute_handle_t attribute_handle
-    ) {
-        return impl()->read_request_(connection_handle, attribute_handle);
-    }
+    ) = 0;
 
     /**
      * Send a read blob request to a server to read a part of the value of an
@@ -333,13 +303,11 @@ public:
      *
      * @note see BLUETOOTH SPECIFICATION Version 5.0 | Vol 3, Part F Section 3.4.4.5
      */
-    ble_error_t read_blob_request(
+    virtual ble_error_t read_blob_request(
         connection_handle_t connection_handle,
         attribute_handle_t attribute_handle,
         uint16_t offset
-    ) {
-        return impl()->read_blob_request_(connection_handle, attribute_handle, offset);
-    }
+    ) = 0;
 
     /**
      * Send a read multiple request to the server. It is used to read two or more
@@ -379,12 +347,10 @@ public:
      *
      * @note see BLUETOOTH SPECIFICATION Version 5.0 | Vol 3, Part F Section 3.4.4.7
      */
-    ble_error_t read_multiple_request(
+    virtual ble_error_t read_multiple_request(
         connection_handle_t connection_handle,
         const ArrayView<const attribute_handle_t>& attribute_handles
-    ) {
-        return impl()->read_multiple_request_(connection_handle, attribute_handles);
-    }
+    ) = 0;
 
     /**
      * Send a read by group type request to the server. It is used to get
@@ -431,13 +397,11 @@ public:
      *
      * @note see BLUETOOTH SPECIFICATION Version 5.0 | Vol 3, Part F Section 3.4.4.9
      */
-    ble_error_t read_by_group_type_request(
+    virtual ble_error_t read_by_group_type_request(
         connection_handle_t connection_handle,
         attribute_handle_range_t read_range,
         const UUID& group_type
-    ) {
-        return impl()->read_by_group_type_request_(connection_handle, read_range, group_type);
-    }
+    ) = 0;
 
     /**
      * Send a write request to the server to write the value of an attribute.
@@ -486,13 +450,11 @@ public:
      *
      * @note see BLUETOOTH SPECIFICATION Version 5.0 | Vol 3, Part F Section 3.4.5.1
      */
-    ble_error_t write_request(
+    virtual ble_error_t write_request(
         connection_handle_t connection_handle,
         attribute_handle_t attribute_handle,
         const ArrayView<const uint8_t>& value
-    ) {
-        return impl()->write_request_(connection_handle, attribute_handle, value);
-    }
+    ) = 0;
 
     /**
      * Send a write command to the server. A write command is similar to a write
@@ -508,13 +470,11 @@ public:
      *
      * @note see BLUETOOTH SPECIFICATION Version 5.0 | Vol 3, Part F Section 3.4.5.3
      */
-    ble_error_t write_command(
+    virtual ble_error_t write_command(
         connection_handle_t connection_handle,
         attribute_handle_t attribute_handle,
         const ArrayView<const uint8_t>& value
-    ) {
-        return impl()->write_command_(connection_handle, attribute_handle, value);
-    }
+    ) = 0;
 
     /**
      * Send a signed write command to the server. Behaviour is similar to a write
@@ -535,13 +495,11 @@ public:
      *
      * @note see BLUETOOTH SPECIFICATION Version 5.0 | Vol 3, Part F Section 3.4.5.4
      */
-    ble_error_t signed_write_command(
+    virtual ble_error_t signed_write_command(
         connection_handle_t connection_handle,
         attribute_handle_t attribute_handle,
         const ArrayView<const uint8_t>& value
-    ) {
-        return impl()->signed_write_command_(connection_handle, attribute_handle, value);
-    }
+    ) = 0;
 
     /**
      * The Prepare Write Request is used to request the server to prepare to
@@ -589,19 +547,12 @@ public:
      * @note see BLUETOOTH SPECIFICATION Version 5.0 | Vol 3, Part F Section 3.4.6.1
      *
      */
-    ble_error_t prepare_write_request(
+    virtual ble_error_t prepare_write_request(
         connection_handle_t connection_handle,
         attribute_handle_t attribute_handle,
         uint16_t offset,
         const ArrayView<const uint8_t>& value
-    ) {
-        return impl()->prepare_write_request_(
-            connection_handle,
-            attribute_handle,
-            offset,
-            value
-        );
-    }
+    ) = 0;
 
     /**
      * Send an Execute Write Request to the server. This request will instruct
@@ -640,12 +591,10 @@ public:
      *
      * @note see BLUETOOTH SPECIFICATION Version 5.0 | Vol 3, Part F Section 3.4.6.3
      */
-    ble_error_t execute_write_request(
+    virtual ble_error_t execute_write_request(
         connection_handle_t connection_handle,
         bool execute
-    ) {
-        return impl()->execute_write_request_(connection_handle, execute);
-    }
+    ) = 0;
 
     /**
      * Register a callback which will handle messages from the server.
@@ -681,7 +630,7 @@ public:
 protected:
     AttClient() { }
 
-    ~AttClient() { }
+    virtual ~AttClient() { }
 
     /**
      * Upon server message reception an implementation shall call this function.

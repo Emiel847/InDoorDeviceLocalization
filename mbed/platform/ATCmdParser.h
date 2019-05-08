@@ -320,4 +320,5 @@ public:
 /**@}*/
 
 } //namespace mbed
+
 #endif //MBED_ATCMDPARSER_H

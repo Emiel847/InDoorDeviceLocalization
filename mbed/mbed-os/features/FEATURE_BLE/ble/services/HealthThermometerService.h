@@ -19,8 +19,6 @@
 
 #include "ble/BLE.h"
 
-#if BLE_FEATURE_GATT_SERVER
-
 /**
 * @class HealthThermometerService
 * @brief BLE Health Thermometer Service. This service provides the location of the thermometer and the temperature.
@@ -147,7 +145,5 @@ protected:
     ReadOnlyGattCharacteristic<TemperatureValueBytes>  tempMeasurement;
     ReadOnlyGattCharacteristic<uint8_t>                tempLocation;
 };
-
-#endif // BLE_FEATURE_GATT_SERVER
 
 #endif /* #ifndef __BLE_HEALTH_THERMOMETER_SERVICE_H__*/

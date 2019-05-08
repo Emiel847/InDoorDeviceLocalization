@@ -17,8 +17,6 @@
 #ifndef MBED_BLE_BATTERY_SERVICE_H__
 #define MBED_BLE_BATTERY_SERVICE_H__
 
-#if BLE_FEATURE_GATT_SERVER
-
 #include "platform/mbed_assert.h"
 #include "ble/BLE.h"
 
@@ -130,7 +128,5 @@ protected:
      */
     ReadOnlyGattCharacteristic<uint8_t> batteryLevelCharacteristic;
 };
-
-#endif // BLE_FEATURE_GATT_SERVER
 
 #endif /* #ifndef MBED_BLE_BATTERY_SERVICE_H__*/

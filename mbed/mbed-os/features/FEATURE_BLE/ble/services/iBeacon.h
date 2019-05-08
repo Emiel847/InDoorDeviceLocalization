@@ -19,8 +19,6 @@
 #include "cmsis_compiler.h"
 #include "ble/BLE.h"
 
-#if BLE_FEATURE_GATT_SERVER
-
 /**
  * iBeacon Service.
  *
@@ -252,7 +250,5 @@ protected:
  * future release.
  */
 typedef iBeacon iBeaconService;
-
-#endif // BLE_FEATURE_GATT_SERVER
 
 #endif //MBED_BLE_IBEACON_H__

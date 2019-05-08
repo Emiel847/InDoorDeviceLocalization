@@ -180,7 +180,10 @@ public:
     uint32_t use_count() const
     {
         if (_ptr != NULL) {
-            return core_util_atomic_load_u32(_counter);
+            core_util_critical_section_enter();
+            uint32_t current_counter = *_counter;
+            core_util_critical_section_exit();
+            return current_counter;
         } else {
             return 0;
         }
@@ -232,7 +235,8 @@ private:
     void decrement_counter()
     {
         if (_ptr != NULL) {
-            if (core_util_atomic_decr_u32(_counter, 1) == 0) {
+            uint32_t new_value = core_util_atomic_decr_u32(_counter, 1);
+            if (new_value == 0) {
                 delete _counter;
                 delete _ptr;
             }

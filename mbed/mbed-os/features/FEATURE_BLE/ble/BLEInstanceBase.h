@@ -21,13 +21,13 @@
 #ifndef MBED_BLE_DEVICE_INSTANCE_BASE__
 #define MBED_BLE_DEVICE_INSTANCE_BASE__
 
-#include "ble/BLE.h"
 #include "ble/Gap.h"
 #include "ble/SecurityManager.h"
-#include "ble/GattServer.h"
-#include "ble/GattClient.h"
+#include "ble/BLE.h"
 
-
+/* Forward declarations. */
+class GattServer;
+class GattClient;
 
 /**
  * @addtogroup ble
@@ -183,8 +183,6 @@ public:
      */
     virtual const Gap &getGap(void) const = 0;
 
-
-#if BLE_FEATURE_GATT_SERVER
     /**
      * Accessor to the vendor implementation of the GattServer interface.
      *
@@ -204,9 +202,7 @@ public:
      * @see BLE::gattServer() GattServer
      */
     virtual const GattServer &getGattServer(void) const = 0;
-#endif // BLE_FEATURE_GATT_SERVER
 
-#if BLE_FEATURE_GATT_CLIENT
     /**
      * Accessor to the vendor implementation of the GattClient interface.
      *
@@ -216,9 +212,7 @@ public:
      * @see BLE::gattClient() GattClient
      */
     virtual GattClient &getGattClient(void) = 0;
-#endif
 
-#if BLE_FEATURE_SECURITY
     /**
      * Accessor to the vendor implementation of the SecurityManager interface.
      *
@@ -238,7 +232,6 @@ public:
      * @see BLE::securityManager() SecurityManager
      */
     virtual const SecurityManager &getSecurityManager(void) const = 0;
-#endif // BLE_FEATURE_SECURITY
 
     /**
      * Process pending events present in the vendor subsystem; then, put the MCU

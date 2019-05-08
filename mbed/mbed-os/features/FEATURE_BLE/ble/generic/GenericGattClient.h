@@ -32,29 +32,18 @@ namespace generic {
  * It requires a pal::GattClient injected at construction site.
  * @attention: Not part of the public interface of BLE API.
  */
-template<template<class> class TPalGattClient, class SigningMonitorEventHandler>
-class GenericGattClient :
-    public interface::GattClient<GenericGattClient<TPalGattClient, SigningMonitorEventHandler> >,
-    public pal::SigningEventMonitor<GenericGattClient<TPalGattClient, SigningMonitorEventHandler>, SigningMonitorEventHandler>,
-    public pal::GattClientEventHandler<GenericGattClient<TPalGattClient, SigningMonitorEventHandler> > {
-
-    using interface::GattClient<GenericGattClient<TPalGattClient, SigningMonitorEventHandler> >::eventHandler;
-
+class GenericGattClient : public GattClient,
+                          public pal::SigningEventMonitor {
 public:
-
-    typedef interface::GattClient<GenericGattClient<TPalGattClient, SigningMonitorEventHandler> > Base;
-    typedef TPalGattClient<GenericGattClient> PalGattClient;
-    typedef typename Base::WriteOp_t WriteOp_t;
-
     /**
      * Create a GenericGattClient from a pal::GattClient
      */
-    GenericGattClient(PalGattClient* pal_client);
+    GenericGattClient(pal::GattClient* pal_client);
 
     /**
      * @see GattClient::launchServiceDiscovery
      */
-    ble_error_t launchServiceDiscovery_(
+    virtual ble_error_t launchServiceDiscovery(
         connection_handle_t connection_handle,
         ServiceDiscovery::ServiceCallback_t service_callback,
         ServiceDiscovery::CharacteristicCallback_t characteristic_callback,
@@ -65,17 +54,17 @@ public:
 	/**
 	 * @see GattClient::isServiceDiscoveryActive
 	 */
-    bool isServiceDiscoveryActive_() const;
+    virtual bool isServiceDiscoveryActive() const;
 
 	/**
 	 * @see GattClient::terminateServiceDiscovery
 	 */
-    void terminateServiceDiscovery_();
+    virtual void terminateServiceDiscovery();
 
 	/**
 	 * @see GattClient::read
 	 */
-    ble_error_t read_(
+    virtual ble_error_t read(
         connection_handle_t connection_handle,
         GattAttribute::Handle_t attribute_handle,
         uint16_t offset
@@ -84,8 +73,8 @@ public:
 	/**
 	 * @see GattClient::write
 	 */
-    ble_error_t write_(
-        WriteOp_t cmd,
+    virtual ble_error_t write(
+        GattClient::WriteOp_t cmd,
         connection_handle_t connection_handle,
         GattAttribute::Handle_t attribute_handle,
         size_t length,
@@ -95,14 +84,14 @@ public:
 	/**
 	 * @see GattClient::onServiceDiscoveryTermination
 	 */
-    void onServiceDiscoveryTermination_(
+    virtual void onServiceDiscoveryTermination(
         ServiceDiscovery::TerminationCallback_t callback
     );
 
 	/**
 	 * @see GattClient::discoverCharacteristicDescriptors
 	 */
-    ble_error_t discoverCharacteristicDescriptors_(
+    virtual ble_error_t discoverCharacteristicDescriptors(
         const DiscoveredCharacteristic& characteristic,
         const CharacteristicDescriptorDiscovery::DiscoveryCallback_t& discoveryCallback,
         const CharacteristicDescriptorDiscovery::TerminationCallback_t& terminationCallback
@@ -111,41 +100,26 @@ public:
 	/**
 	 * @see GattClient::isCharacteristicDescriptorDiscoveryActive
 	 */
-    bool isCharacteristicDescriptorDiscoveryActive_(
+    virtual bool isCharacteristicDescriptorDiscoveryActive(
         const DiscoveredCharacteristic& characteristic
     ) const;
 
 	/**
 	 * @see GattClient::terminateCharacteristicDescriptorDiscovery
 	 */
-    void terminateCharacteristicDescriptorDiscovery_(
+    virtual void terminateCharacteristicDescriptorDiscovery(
         const DiscoveredCharacteristic& characteristic
-    );
-
-    /**
-     * @see GattClient::negotiateAttMtu
-     */
-    ble_error_t negotiateAttMtu_(
-        connection_handle_t connection
     );
 
 	/**
 	 * @see GattClient::reset
 	 */
-    ble_error_t reset_(void);
+    virtual ble_error_t reset(void);
 
     /**
      * @see ble::pal::SigningEventMonitor::set_signing_event_handler
      */
-    void set_signing_event_handler_(SigningMonitorEventHandler *signing_event_handler);
-
-    /**
-     * @see pal::GattClient::EventHandler::on_att_mtu_change
-     */
-    void on_att_mtu_change_(
-        ble::connection_handle_t connection_handle,
-        uint16_t att_mtu_size
-    );
+    virtual void set_signing_event_handler(pal::SigningEventMonitor::EventHandler *signing_event_handler);
 
 private:
     struct ProcedureControlBlock;
@@ -167,14 +141,14 @@ private:
 
     uint16_t get_mtu(connection_handle_t connection) const;
 
-    PalGattClient* const _pal_client;
+    pal::GattClient* const _pal_client;
     ServiceDiscovery::TerminationCallback_t _termination_callback;
-    SigningMonitorEventHandler* _signing_event_handler;
+    pal::SigningEventMonitor::EventHandler* _signing_event_handler;
     mutable ProcedureControlBlock* control_blocks;
     bool _is_reseting;
 };
 
-} // generic
-} // ble
+}
+}
 
 #endif /* MBED_BLE_GENERIC_GATT_CLIENT */

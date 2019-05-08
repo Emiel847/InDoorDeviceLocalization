@@ -17,19 +17,17 @@
 #if DEVICE_TRNG
 
 #include "hal/trng_api.h"
-#include "platform/SingletonPtr.h"
 #include "platform/PlatformMutex.h"
-
-SingletonPtr<PlatformMutex> mbedtls_mutex;
 
 extern "C"
 int mbedtls_hardware_poll( void *data, unsigned char *output, size_t len, size_t *olen ) {
+    static PlatformMutex trng_mutex;
     trng_t trng_obj;
-    mbedtls_mutex->lock();
+    trng_mutex.lock();
     trng_init(&trng_obj);
     int ret = trng_get_bytes(&trng_obj, output, len, olen);
     trng_free(&trng_obj);
-    mbedtls_mutex->unlock();
+    trng_mutex.unlock();
     return ret;
 }
 

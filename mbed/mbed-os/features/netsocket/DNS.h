@@ -25,7 +25,7 @@
 class DNS {
 public:
 
-    /** Translate a hostname to an IP address with specific version using network interface name.
+    /** Translate a hostname to an IP address with specific version.
      *
      *  The hostname may be either a domain name or an IP address. If the
      *  hostname is an IP address, no network transactions will be performed.
@@ -37,11 +37,11 @@ public:
      *  @param address  Pointer to a SocketAddress to store the result.
      *  @param version  IP version of address to resolve, NSAPI_UNSPEC indicates
      *                  version is chosen by the stack (defaults to NSAPI_UNSPEC).
-     *  @param interface_name  Network interface name
      *  @return         NSAPI_ERROR_OK on success, negative error code on failure.
      */
     virtual nsapi_error_t gethostbyname(const char *host,
-                                        SocketAddress *address, nsapi_version_t version = NSAPI_UNSPEC, const char *interface_name = NULL) = 0;
+                                        SocketAddress *address, nsapi_version_t version = NSAPI_UNSPEC) = 0;
+
     /** Hostname translation callback for gethostbyname_async.
      *
      *  The callback is called after DNS resolution completes, or a failure occurs.
@@ -57,7 +57,7 @@ public:
      */
     typedef mbed::Callback<void (nsapi_error_t result, SocketAddress *address)> hostbyname_cb_t;
 
-    /** Translate a hostname to an IP address (asynchronous)
+    /** Translate a hostname to an IP address (asynchronous).
      *
      *  The hostname may be either a domain name or an IP address. If the
      *  hostname is an IP address, no network transactions will be performed.
@@ -74,14 +74,13 @@ public:
      *  @param callback Callback that is called to return the result.
      *  @param version  IP version of address to resolve. NSAPI_UNSPEC indicates that the
      *                  version is chosen by the stack (defaults to NSAPI_UNSPEC).
-     *  @param interface_name  Network interface name
      *  @return         NSAPI_ERROR_OK on immediate success,
      *                  negative error code on immediate failure or
      *                  a positive unique ID that represents the hostname translation operation
      *                  and can be passed to cancel.
      */
-    virtual nsapi_value_or_error_t gethostbyname_async(const char *host, hostbyname_cb_t callback, nsapi_version_t version = NSAPI_UNSPEC,
-                                                       const char *interface_name = NULL) = 0;
+    virtual nsapi_value_or_error_t gethostbyname_async(const char *host, hostbyname_cb_t callback,
+                                                       nsapi_version_t version = NSAPI_UNSPEC) = 0;
 
     /** Cancel asynchronous hostname translation.
      *
@@ -95,10 +94,9 @@ public:
     /** Add a domain name server to list of servers to query.
      *
      *  @param address  DNS server host address.
-     *  @param interface_name  Network interface name
      *  @return         NSAPI_ERROR_OK on success, negative error code on failure.
      */
-    virtual nsapi_error_t add_dns_server(const SocketAddress &address, const char *interface_name = NULL) = 0;
+    virtual nsapi_error_t add_dns_server(const SocketAddress &address) = 0;
 };
 
 #endif

@@ -29,8 +29,7 @@ namespace pal {
  * This class let vendors define their abstraction layer in term of an AttClient
  * and adapt any AttClient into a GattClient.
  */
-template<class AttClient, class EventHandler>
-class AttClientToGattClientAdapter : public GattClient<AttClientToGattClientAdapter<AttClient, EventHandler>, EventHandler > {
+class AttClientToGattClientAdapter : public GattClient {
 
 public:
     static const uint16_t END_ATTRIBUTE_HANDLE = 0xFFFF;
@@ -43,7 +42,7 @@ public:
      * @param client The client to adapt.
      */
     AttClientToGattClientAdapter(AttClient& client) :
-        _client(client) {
+        GattClient(), _client(client) {
         _client.when_server_message_received(
             mbed::callback(this, &AttClientToGattClientAdapter::on_server_event)
         );
@@ -57,14 +56,14 @@ public:
     /**
      * @see ble::pal::GattClient::exchange_mtu
      */
-    ble_error_t exchange_mtu_(connection_handle_t connection) {
+    virtual ble_error_t exchange_mtu(connection_handle_t connection) {
         return _client.exchange_mtu_request(connection);
     }
 
     /**
      * @see ble::pal::GattClient::get_mtu_size
      */
-    ble_error_t get_mtu_size_(
+    virtual ble_error_t get_mtu_size(
         connection_handle_t connection_handle,
         uint16_t& mtu_size
     ) {
@@ -74,7 +73,7 @@ public:
     /**
      * @see ble::pal::GattClient::discover_primary_service
      */
-    ble_error_t discover_primary_service_(
+    virtual ble_error_t discover_primary_service(
         connection_handle_t connection,
         attribute_handle_t discovery_range_begining
     ) {
@@ -88,7 +87,7 @@ public:
     /**
      * @see ble::pal::GattClient::discover_primary_service_by_service_uuid
      */
-    ble_error_t discover_primary_service_by_service_uuid_(
+    virtual ble_error_t discover_primary_service_by_service_uuid(
         connection_handle_t connection_handle,
         attribute_handle_t discovery_range_begining,
         const UUID& uuid
@@ -107,7 +106,7 @@ public:
     /**
      * @see ble::pal::GattClient::find_included_service
      */
-    ble_error_t find_included_service_(
+    virtual ble_error_t find_included_service(
         connection_handle_t connection_handle,
         attribute_handle_range_t service_range
     ) {
@@ -121,7 +120,7 @@ public:
     /**
      * @see ble::pal::GattClient::discover_characteristics_of_a_service
      */
-    ble_error_t discover_characteristics_of_a_service_(
+    virtual ble_error_t discover_characteristics_of_a_service(
         connection_handle_t connection_handle,
         attribute_handle_range_t discovery_range
     ) {
@@ -135,7 +134,7 @@ public:
     /**
      * @see ble::pal::GattClient::discover_characteristics_descriptors
      */
-    ble_error_t discover_characteristics_descriptors_(
+    virtual ble_error_t discover_characteristics_descriptors(
         connection_handle_t connection_handle,
         attribute_handle_range_t descriptors_discovery_range
     ) {
@@ -148,7 +147,7 @@ public:
     /**
      * @see ble::pal::GattClient::read_attribute_value
      */
-    ble_error_t read_attribute_value_(
+    virtual ble_error_t read_attribute_value(
         connection_handle_t connection_handle,
         attribute_handle_t attribute_handle
     ) {
@@ -161,7 +160,7 @@ public:
     /**
      * @see ble::pal::GattClient::read_using_characteristic_uuid
      */
-    ble_error_t read_using_characteristic_uuid_(
+    virtual ble_error_t read_using_characteristic_uuid(
         connection_handle_t connection_handle,
         attribute_handle_range_t read_range,
         const UUID& uuid
@@ -176,7 +175,7 @@ public:
     /**
      * @see ble::pal::GattClient::read_attribute_blob
      */
-    ble_error_t read_attribute_blob_(
+    virtual ble_error_t read_attribute_blob(
         connection_handle_t connection_handle,
         attribute_handle_t attribute_handle,
         uint16_t offset
@@ -191,7 +190,7 @@ public:
     /**
      * @see ble::pal::GattClient::read_multiple_characteristic_values
      */
-    ble_error_t read_multiple_characteristic_values_(
+    virtual ble_error_t read_multiple_characteristic_values(
         connection_handle_t connection_handle,
         const ArrayView<const attribute_handle_t>& characteristic_value_handles
     ) {
@@ -204,7 +203,7 @@ public:
     /**
      * @see ble::pal::GattClient::write_without_response
      */
-    ble_error_t write_without_response_(
+    virtual ble_error_t write_without_response(
         connection_handle_t connection_handle,
         attribute_handle_t characteristic_value_handle,
         const ArrayView<const uint8_t>& value
@@ -219,7 +218,7 @@ public:
     /**
      * @see ble::pal::GattClient::signed_write_without_response
      */
-    ble_error_t signed_write_without_response_(
+    virtual ble_error_t signed_write_without_response(
         connection_handle_t connection_handle,
         attribute_handle_t characteristic_value_handle,
         const ArrayView<const uint8_t>& value
@@ -234,7 +233,7 @@ public:
     /**
      * @see ble::pal::GattClient::write_attribute
      */
-    ble_error_t write_attribute_(
+    virtual ble_error_t write_attribute(
         connection_handle_t connection_handle,
         attribute_handle_t attribute_handle,
         const ArrayView<const uint8_t>& value
@@ -249,7 +248,7 @@ public:
     /**
      * @see ble::pal::GattClient::queue_prepare_write
      */
-    ble_error_t queue_prepare_write_(
+    virtual ble_error_t queue_prepare_write(
         connection_handle_t connection_handle,
         attribute_handle_t characteristic_value_handle,
         const ArrayView<const uint8_t>& value,
@@ -266,7 +265,7 @@ public:
     /**
      * @see ble::pal::GattClient::execute_write_queue
      */
-    ble_error_t execute_write_queue_(
+    virtual ble_error_t execute_write_queue(
         connection_handle_t connection_handle,
         bool execute
     ) {
@@ -276,14 +275,14 @@ public:
     /**
      * @see ble::pal::GattClient::initialize
      */
-    ble_error_t initialize_() {
+    virtual ble_error_t initialize() {
         return _client.initialize();
     }
 
     /**
      * @see ble::pal::GattClient::terminate
      */
-    ble_error_t terminate_() {
+    virtual ble_error_t terminate() {
         return _client.initialize();
     }
 

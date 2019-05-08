@@ -32,8 +32,6 @@
 #ifndef MBED_OS_LORAPHY_AS923_H_
 #define MBED_OS_LORAPHY_AS923_H_
 
-#if !(DOXYGEN_ONLY)
-
 #include "LoRaPHY.h"
 
 /*!
@@ -47,6 +45,7 @@
 #define AS923_MAX_NB_BANDS                          1
 
 #define AS923_CHANNEL_MASK_SIZE                    1
+
 
 class LoRaPHYAS923 : public LoRaPHY {
 
@@ -69,5 +68,4 @@ private:
     uint16_t default_channel_mask[AS923_CHANNEL_MASK_SIZE];
 };
 
-#endif /* DOXYGEN_ONLY*/
 #endif /* MBED_OS_LORAPHY_AS923_H_ */

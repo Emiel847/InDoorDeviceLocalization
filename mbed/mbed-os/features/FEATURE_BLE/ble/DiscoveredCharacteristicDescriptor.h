@@ -73,7 +73,7 @@ public:
      */
     DiscoveredCharacteristicDescriptor(
         GattClient *client,
-        ble::connection_handle_t connectionHandle,
+        Gap::Handle_t connectionHandle,
         GattAttribute::Handle_t attributeHandle,
         const UUID &uuid
     ) : _client(client),
@@ -109,7 +109,7 @@ public:
      * @return the connection handle to the GattServer containing this
      * descriptor.
      */
-    ble::connection_handle_t getConnectionHandle() const
+    Gap::Handle_t getConnectionHandle() const
     {
         return _connectionHandle;
     }
@@ -139,7 +139,7 @@ public:
 
 private:
     GattClient  *_client;
-    ble::connection_handle_t _connectionHandle;
+    Gap::Handle_t _connectionHandle;
     UUID _uuid;
     GattAttribute::Handle_t _gattHandle;
 };

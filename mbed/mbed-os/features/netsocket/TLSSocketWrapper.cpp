@@ -23,7 +23,6 @@
 #define TRACE_GROUP "TLSW"
 #include "mbed-trace/mbed_trace.h"
 #include "mbedtls/debug.h"
-#include "mbedtls/platform.h"
 #include "mbed_error.h"
 #include "Kernel.h"
 
@@ -46,12 +45,6 @@ TLSSocketWrapper::TLSSocketWrapper(Socket *transport, const char *hostname, cont
     _clicert_allocated(false),
     _ssl_conf_allocated(false)
 {
-#if defined(MBEDTLS_PLATFORM_C)
-    int ret = mbedtls_platform_setup(NULL);
-    if (ret != 0) {
-        print_mbedtls_error("mbedtls_platform_setup()", ret);
-    }
-#endif /* MBEDTLS_PLATFORM_C */
     mbedtls_entropy_init(&_entropy);
     mbedtls_ctr_drbg_init(&_ctr_drbg);
     mbedtls_ssl_init(&_ssl);
@@ -78,9 +71,6 @@ TLSSocketWrapper::~TLSSocketWrapper()
     set_ca_chain(NULL);
 #endif
     set_ssl_config(NULL);
-#if defined(MBEDTLS_PLATFORM_C)
-    mbedtls_platform_teardown(NULL);
-#endif /* MBEDTLS_PLATFORM_C */
 }
 
 void TLSSocketWrapper::set_hostname(const char *hostname)
@@ -109,8 +99,6 @@ nsapi_error_t TLSSocketWrapper::set_root_ca_cert(const void *root_ca, size_t len
     if ((ret = mbedtls_x509_crt_parse(crt, static_cast<const unsigned char *>(root_ca),
                                       len)) != 0) {
         print_mbedtls_error("mbedtls_x509_crt_parse", ret);
-        mbedtls_x509_crt_free(crt);
-        delete crt;
         return NSAPI_ERROR_PARAMETER;
     }
     set_ca_chain(crt);
@@ -142,16 +130,12 @@ nsapi_error_t TLSSocketWrapper::set_client_cert_key(const void *client_cert, siz
     if ((ret = mbedtls_x509_crt_parse(crt, static_cast<const unsigned char *>(client_cert),
                                       client_cert_len)) != 0) {
         print_mbedtls_error("mbedtls_x509_crt_parse", ret);
-        mbedtls_x509_crt_free(crt);
-        delete crt;
         return NSAPI_ERROR_PARAMETER;
     }
     mbedtls_pk_init(&_pkctx);
     if ((ret = mbedtls_pk_parse_key(&_pkctx, static_cast<const unsigned char *>(client_private_key_pem),
                                     client_private_key_len, NULL, 0)) != 0) {
         print_mbedtls_error("mbedtls_pk_parse_key", ret);
-        mbedtls_x509_crt_free(crt);
-        delete crt;
         return NSAPI_ERROR_PARAMETER;
     }
     set_own_cert(crt);
@@ -187,7 +171,7 @@ nsapi_error_t TLSSocketWrapper::start_handshake(bool first_call)
                                      (const unsigned char *) DRBG_PERS,
                                      sizeof(DRBG_PERS))) != 0) {
         print_mbedtls_error("mbedtls_crt_drbg_init", ret);
-        return NSAPI_ERROR_AUTH_FAILURE;
+        return NSAPI_ERROR_PARAMETER;
     }
 
     mbedtls_ssl_conf_rng(get_ssl_config(), mbedtls_ctr_drbg_random, &_ctr_drbg);
@@ -202,7 +186,7 @@ nsapi_error_t TLSSocketWrapper::start_handshake(bool first_call)
     tr_debug("mbedtls_ssl_setup()");
     if ((ret = mbedtls_ssl_setup(&_ssl, get_ssl_config())) != 0) {
         print_mbedtls_error("mbedtls_ssl_setup", ret);
-        return NSAPI_ERROR_AUTH_FAILURE;
+        return NSAPI_ERROR_PARAMETER;
     }
 
     _transport->set_blocking(false);

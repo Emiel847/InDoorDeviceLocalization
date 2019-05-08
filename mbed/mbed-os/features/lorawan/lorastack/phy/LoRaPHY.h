@@ -40,9 +40,6 @@
 #include "LoRaRadio.h"
 #include "lora_phy_ds.h"
 
-/** LoRaPHY Class
- * Parent class for LoRa regional PHY implementations
- */
 class LoRaPHY : private mbed::NonCopyable<LoRaPHY> {
 
 public:

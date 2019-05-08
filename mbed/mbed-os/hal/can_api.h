@@ -21,7 +21,6 @@
 #define MBED_CAN_API_H
 
 #include "device.h"
-#include "pinmap.h"
 
 #if DEVICE_CAN
 
@@ -76,24 +75,6 @@ void          can_reset(can_t *obj);
 unsigned char can_rderror(can_t *obj);
 unsigned char can_tderror(can_t *obj);
 void          can_monitor(can_t *obj, int silent);
-
-/** Get the pins that support CAN RD
- *
- * Return a PinMap array of pins that support CAN RD. The
- * array is terminated with {NC, NC, 0}.
- *
- * @return PinMap array
- */
-const PinMap *can_rd_pinmap(void);
-
-/** Get the pins that support CAN TD
- *
- * Return a PinMap array of pins that support CAN TD. The
- * array is terminated with {NC, NC, 0}.
- *
- * @return PinMap array
- */
-const PinMap *can_td_pinmap(void);
 
 #ifdef __cplusplus
 };

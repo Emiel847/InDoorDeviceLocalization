@@ -16,45 +16,23 @@
  */
 #include "CellularContext.h"
 
-MBED_WEAK CellularInterface *CellularInterface::get_target_default_instance()
-{
-    return mbed::CellularContext::get_default_instance();
-}
-
 namespace mbed {
-
+#ifdef CELLULAR_DEVICE
 MBED_WEAK CellularContext *CellularContext::get_default_instance()
 {
-    CellularDevice *dev = CellularDevice::get_default_instance();
-    if (!dev) {
-        return NULL;
-    }
-
-    static CellularContext *context = dev->create_context(NULL, NULL, MBED_CONF_CELLULAR_CONTROL_PLANE_OPT);
-#if defined(MDMDCD) && defined(MDM_PIN_POLARITY)
-    context->set_file_handle(static_cast<UARTSerial *>(&dev->get_file_handle()), MDMDCD, MDM_PIN_POLARITY);
-#endif // #if defined(MDMDCD) && defined(MDM_PIN_POLARITY)
-    return context;
-}
-
-MBED_WEAK CellularContext *CellularContext::get_default_nonip_instance()
-{
     // Uses default APN, uname, password from mbed_app.json
-    CellularDevice *dev = CellularDevice::get_default_instance();
+    static CellularDevice *dev = CellularDevice::get_default_instance();
     if (!dev) {
         return NULL;
     }
-
-    static CellularContext *context = dev->create_context(NULL, NULL, MBED_CONF_CELLULAR_CONTROL_PLANE_OPT, true);
-#if defined(MDMDCD) && defined(MDM_PIN_POLARITY)
-    context->set_file_handle(static_cast<UARTSerial *>(&dev->get_file_handle()), MDMDCD, MDM_PIN_POLARITY);
-#endif // #if defined(MDMDCD) && defined(MDM_PIN_POLARITY)
+    static CellularContext *context = dev->create_context();
     return context;
 }
-
-void CellularContext::cp_data_received()
+#else
+MBED_WEAK CellularContext *CellularContext::get_default_instance()
 {
-    _cp_netif->data_received();
+    return NULL;
 }
+#endif // CELLULAR_DEVICE
 
 } // namespace mbed

@@ -17,6 +17,8 @@
 
 #include "CellularStateMachine.h"
 #include "CellularDevice.h"
+#include "CellularPower.h"
+#include "CellularSIM.h"
 #include "CellularLog.h"
 #include "Thread.h"
 #include "UARTSerial.h"
@@ -40,16 +42,15 @@
 const int STM_STOPPED = -99;
 const int ACTIVE_PDP_CONTEXT = 0x01;
 const int ATTACHED_TO_NETWORK = 0x02;
-const int DEVICE_READY = 0x04;
 
 namespace mbed {
 
 CellularStateMachine::CellularStateMachine(CellularDevice &device, events::EventQueue &queue) :
     _cellularDevice(device), _state(STATE_INIT), _next_state(_state), _target_state(_state),
-    _event_status_cb(0), _network(0), _queue(queue), _queue_thread(0), _sim_pin(0),
+    _event_status_cb(0), _network(0), _power(0), _sim(0), _queue(queue), _queue_thread(0), _sim_pin(0),
     _retry_count(0), _event_timeout(-1), _event_id(-1), _plmn(0), _command_success(false),
     _plmn_network_found(false), _is_retry(false), _cb_data(), _current_event(NSAPI_EVENT_CONNECTION_STATUS_CHANGE),
-    _status(0)
+    _network_status(0)
 {
 #if MBED_CONF_CELLULAR_RANDOM_MAX_START_DELAY == 0
     _start_time = 0;
@@ -74,7 +75,6 @@ CellularStateMachine::CellularStateMachine(CellularDevice &device, events::Event
 
 CellularStateMachine::~CellularStateMachine()
 {
-    tr_debug("CellularStateMachine destruct");
     stop();
 }
 
@@ -85,8 +85,7 @@ void CellularStateMachine::reset()
     _event_id = -1;
     _plmn_network_found = false;
     _is_retry = false;
-    _status = 0;
-    _target_state = STATE_INIT;
+    _network_status = 0;
     enter_to_state(STATE_INIT);
 }
 
@@ -102,6 +101,15 @@ void CellularStateMachine::stop()
 
     reset();
     _event_id = STM_STOPPED;
+    if (_power) {
+        _cellularDevice.close_power();
+        _power = NULL;
+    }
+
+    if (_sim) {
+        _cellularDevice.close_sim();
+        _sim = NULL;
+    }
 
     if (_network) {
         _cellularDevice.close_network();
@@ -111,9 +119,13 @@ void CellularStateMachine::stop()
 
 bool CellularStateMachine::power_on()
 {
-    _cb_data.error = _cellularDevice.hard_power_on();
-    if (_cb_data.error != NSAPI_ERROR_OK) {
-        tr_warn("Hard power on failed.");
+    _cb_data.error = _power->on();
+    if (_cb_data.error != NSAPI_ERROR_OK && _cb_data.error != NSAPI_ERROR_UNSUPPORTED) {
+        tr_warn("Power on failed. Try to power off/on.");
+        _cb_data.error = _power->off();
+        if (_cb_data.error != NSAPI_ERROR_OK && _cb_data.error != NSAPI_ERROR_UNSUPPORTED) {
+            tr_error("Power off failed!");
+        }
         return false;
     }
     return true;
@@ -131,10 +143,15 @@ void CellularStateMachine::set_plmn(const char *plmn)
 
 bool CellularStateMachine::open_sim()
 {
-    CellularDevice::SimState state = CellularDevice::SimStateUnknown;
+    if (!_sim) {
+        // can only fail with allocation with new and then it's critical error
+        _sim = _cellularDevice.open_sim();
+    }
+
+    CellularSIM::SimState state = CellularSIM::SimStateUnknown;
     // wait until SIM is readable
     // here you could add wait(secs) if you know start delay of your SIM
-    _cb_data.error = _cellularDevice.get_sim_state(state);
+    _cb_data.error = _sim->get_sim_state(state);
     if (_cb_data.error != NSAPI_ERROR_OK) {
         tr_info("Waiting for SIM (err while reading)...");
         return false;
@@ -146,10 +163,10 @@ bool CellularStateMachine::open_sim()
         _event_status_cb((nsapi_event_t)CellularSIMStatusChanged, (intptr_t)&_cb_data);
     }
 
-    if (state == CellularDevice::SimStatePinNeeded) {
-        if (_sim_pin) {
-            tr_info("Entering PIN to open SIM");
-            _cb_data.error = _cellularDevice.set_pin(_sim_pin);
+    if (state == CellularSIM::SimStatePinNeeded) {
+        if (strlen(_sim_pin)) {
+            tr_info("Entering PIN to open SIM.");
+            _cb_data.error = _sim->set_pin(_sim_pin);
             if (_cb_data.error) {
                 tr_error("Failed to set PIN: error %d", _cb_data.error);
             }
@@ -161,7 +178,7 @@ bool CellularStateMachine::open_sim()
         }
     }
 
-    return state == CellularDevice::SimStateReady;
+    return state == CellularSIM::SimStateReady;
 }
 
 bool CellularStateMachine::is_registered()
@@ -178,7 +195,7 @@ bool CellularStateMachine::is_registered()
     }
 
     _cb_data.status_data = status;
-    return is_registered || _status;
+    return is_registered || _network_status;
 }
 
 bool CellularStateMachine::get_network_registration(CellularNetwork::RegistrationType type,
@@ -320,7 +337,6 @@ void CellularStateMachine::retry_state_or_fail()
         tr_debug("%s: retry %d/%d", get_state_string(_state), _retry_count, RETRY_ARRAY_SIZE);
         _event_timeout = _retry_timeout_array[_retry_count];
         _is_retry = true;
-        _cb_data.error = NSAPI_ERROR_OK;
     } else {
         report_failure(get_state_string(_state));
         return;
@@ -331,8 +347,10 @@ void CellularStateMachine::state_init()
 {
     _cellularDevice.set_timeout(TIMEOUT_POWER_ON);
     tr_info("Start connecting (timeout %d s)", TIMEOUT_POWER_ON / 1000);
-    _cb_data.error = _cellularDevice.is_ready();
-    _status = _cb_data.error ? 0 : DEVICE_READY;
+    if (!_power) {
+        _power = _cellularDevice.open_power();
+    }
+    _cb_data.error = _power->is_device_ready();
     if (_cb_data.error != NSAPI_ERROR_OK) {
         _event_timeout = _start_time;
         if (_start_time > 0) {
@@ -359,6 +377,9 @@ void CellularStateMachine::state_power_on()
 bool CellularStateMachine::device_ready()
 {
     tr_info("Modem ready");
+    if (_cellularDevice.init_module() != NSAPI_ERROR_OK) {
+        return false;
+    }
 
     if (!_network) {
         _network = _cellularDevice.open_network();
@@ -377,29 +398,26 @@ bool CellularStateMachine::device_ready()
     if (_event_status_cb) {
         _event_status_cb((nsapi_event_t)CellularDeviceReady, (intptr_t)&_cb_data);
     }
-    _cellularDevice.set_ready_cb(0);
+
+    _power->remove_device_ready_urc_cb(mbed::callback(this, &CellularStateMachine::ready_urc_cb));
+    _cellularDevice.close_power();
+    _power = NULL;
     return true;
 }
 
 void CellularStateMachine::state_device_ready()
 {
     _cellularDevice.set_timeout(TIMEOUT_POWER_ON);
-    if (!(_status & DEVICE_READY)) {
-        tr_debug("Device was not ready, calling soft_power_on()");
-        _cb_data.error = _cellularDevice.soft_power_on();
-    }
+    _cb_data.error = _power->set_at_mode();
     if (_cb_data.error == NSAPI_ERROR_OK) {
-        _cb_data.error = _cellularDevice.init();
-        if (_cb_data.error == NSAPI_ERROR_OK) {
-            if (device_ready()) {
-                _status = 0;
-                enter_to_state(STATE_SIM_PIN);
-            }
+        if (device_ready()) {
+            enter_to_state(STATE_SIM_PIN);
+        } else {
+            retry_state_or_fail();
         }
-    }
-    if (_cb_data.error != NSAPI_ERROR_OK) {
+    } else {
         if (_retry_count == 0) {
-            _cellularDevice.set_ready_cb(callback(this, &CellularStateMachine::device_ready_cb));
+            _power->set_device_ready_urc_cb(mbed::callback(this, &CellularStateMachine::ready_urc_cb));
         }
         retry_state_or_fail();
     }
@@ -425,13 +443,13 @@ void CellularStateMachine::state_sim_pin()
         }
 
         if (_network->is_active_context()) { // check if context was already activated
-            tr_debug("Active context found.");
-            _status |= ACTIVE_PDP_CONTEXT;
+            tr_debug("ACTIVE CONTEXT FOUND, skip registering.");
+            _network_status |= ACTIVE_PDP_CONTEXT;
         }
         CellularNetwork::AttachStatus status; // check if modem is already attached to a network
         if (_network->get_attach(status) == NSAPI_ERROR_OK && status == CellularNetwork::Attached) {
-            _status |= ATTACHED_TO_NETWORK;
-            tr_debug("Cellular already attached.");
+            _network_status |= ATTACHED_TO_NETWORK;
+            tr_debug("DEVICE IS ALREADY ATTACHED TO NETWORK, skip registering and attach.");
         }
         if (_plmn) {
             enter_to_state(STATE_MANUAL_REGISTERING_NETWORK);
@@ -490,10 +508,12 @@ void CellularStateMachine::state_attaching()
 {
     _cellularDevice.set_timeout(TIMEOUT_CONNECT);
     tr_info("Attaching network (timeout %d s)", TIMEOUT_CONNECT / 1000);
-    if (_status != ATTACHED_TO_NETWORK) {
+    if (_network_status != ATTACHED_TO_NETWORK) {
         _cb_data.error = _network->set_attach();
     }
     if (_cb_data.error == NSAPI_ERROR_OK) {
+        _cellularDevice.close_sim();
+        _sim = NULL;
         if (_event_status_cb) {
             _cb_data.status_data = CellularNetwork::Attached;
             _event_status_cb(_current_event, (intptr_t)&_cb_data);
@@ -523,15 +543,9 @@ void CellularStateMachine::continue_from_state(CellularState state)
 nsapi_error_t CellularStateMachine::run_to_state(CellularStateMachine::CellularState state)
 {
     _mutex.lock();
-
-    CellularState tmp_state = state;
-    if (_plmn && tmp_state == STATE_REGISTERING_NETWORK) {
-        tmp_state = STATE_MANUAL_REGISTERING_NETWORK;
-    }
     // call pre_event via queue so that it's in same thread and it's safe to decisions
-    int id = _queue.call_in(0, this, &CellularStateMachine::pre_event, tmp_state);
+    int id = _queue.call_in(0, this, &CellularStateMachine::pre_event, state);
     if (!id) {
-        report_failure("Failed to call queue.");
         stop();
         _mutex.unlock();
         return NSAPI_ERROR_NO_MEMORY;
@@ -572,11 +586,7 @@ bool CellularStateMachine::get_current_status(CellularStateMachine::CellularStat
     _mutex.lock();
     current_state = _state;
     target_state = _target_state;
-    if (_event_id == -1 || _event_id == STM_STOPPED) {
-        is_running = false;
-    } else {
-        is_running = true;
-    }
+    is_running = _event_id != -1;
     _mutex.unlock();
     return is_running;
 }
@@ -586,8 +596,9 @@ void CellularStateMachine::event()
 #if MBED_CONF_MBED_TRACE_ENABLE
     if (_network) {
         int rssi;
-        if (_network->get_signal_quality(rssi) == NSAPI_ERROR_OK) {
-            if (rssi == CellularNetwork::SignalQualityUnknown) {
+        int ber;
+        if (_network->get_signal_quality(rssi, ber) == NSAPI_ERROR_OK) {
+            if (rssi == 0) {
                 tr_info("RSSI unknown");
             } else {
                 tr_info("RSSI %d dBm", rssi);
@@ -633,7 +644,7 @@ void CellularStateMachine::event()
             break;
     }
 
-    if (check_is_target_reached()) {
+    if ((_target_state == _state && _cb_data.error == NSAPI_ERROR_OK && !_is_retry) || _event_id == STM_STOPPED) {
         _event_id = -1;
         return;
     }
@@ -664,7 +675,6 @@ nsapi_error_t CellularStateMachine::start_dispatch()
 
     _queue_thread = new rtos::Thread(osPriorityNormal, 2048, NULL, "stm_queue");
     if (_queue_thread->start(callback(&_queue, &events::EventQueue::dispatch_forever)) != osOK) {
-        report_failure("Failed to start thread.");
         stop();
         return NSAPI_ERROR_NO_MEMORY;
     }
@@ -675,20 +685,6 @@ nsapi_error_t CellularStateMachine::start_dispatch()
 void CellularStateMachine::set_cellular_callback(mbed::Callback<void(nsapi_event_t, intptr_t)> status_cb)
 {
     _event_status_cb = status_cb;
-}
-
-bool CellularStateMachine::check_is_target_reached()
-{
-    if (((_target_state == _state || _target_state < _next_state) && _cb_data.error == NSAPI_ERROR_OK && !_is_retry) ||
-            _event_id == STM_STOPPED) {
-        if (_target_state != _state && _target_state < _next_state) {
-            // we are skipping the state, update _state to current state because we have reached it
-            _state = _target_state;
-        }
-        _event_id = -1;
-        return true;
-    }
-    return false;
 }
 
 void CellularStateMachine::cellular_event_changed(nsapi_event_t ev, intptr_t ptr)
@@ -703,50 +699,33 @@ void CellularStateMachine::cellular_event_changed(nsapi_event_t ev, intptr_t ptr
                     if (!_plmn_network_found) {
                         _plmn_network_found = true;
                         _queue.cancel(_event_id);
-                        _is_retry = false;
-                        _event_id = -1;
-                        if (!check_is_target_reached()) {
-                            continue_from_state(STATE_ATTACHING_NETWORK);
-                        }
+                        continue_from_state(STATE_ATTACHING_NETWORK);
                     }
                 }
             } else {
                 _queue.cancel(_event_id);
-                _is_retry = false;
-                _event_id = -1;
-                if (!check_is_target_reached()) {
-                    continue_from_state(STATE_ATTACHING_NETWORK);
-                }
+                continue_from_state(STATE_ATTACHING_NETWORK);
             }
         }
     }
 }
 
-void CellularStateMachine::device_ready_cb()
+void CellularStateMachine::ready_urc_cb()
 {
-    tr_debug("Device ready callback");
-    if (_state == STATE_DEVICE_READY && _cellularDevice.init() == NSAPI_ERROR_OK) {
+    tr_debug("Device ready URC func called");
+    if (_state == STATE_DEVICE_READY && _power->set_at_mode() == NSAPI_ERROR_OK) {
         tr_debug("State was STATE_DEVICE_READY and at mode ready, cancel state and move to next");
         _queue.cancel(_event_id);
-        _event_id = -1;
         if (device_ready()) {
-            _is_retry = false;
-            _status = 0;
-            if (!check_is_target_reached()) {
-                continue_from_state(STATE_SIM_PIN);
-            }
+            continue_from_state(STATE_SIM_PIN);
         } else {
             continue_from_state(STATE_DEVICE_READY);
         }
     }
 }
 
-void CellularStateMachine::set_retry_timeout_array(const uint16_t timeout[], int array_len)
+void CellularStateMachine::set_retry_timeout_array(uint16_t timeout[], int array_len)
 {
-    if (!timeout || array_len <= 0) {
-        tr_warn("set_retry_timeout_array, timeout array null or invalid length");
-        return;
-    }
     _retry_array_length = array_len > RETRY_ARRAY_SIZE ? RETRY_ARRAY_SIZE : array_len;
 
     for (int i = 0; i < _retry_array_length; i++) {

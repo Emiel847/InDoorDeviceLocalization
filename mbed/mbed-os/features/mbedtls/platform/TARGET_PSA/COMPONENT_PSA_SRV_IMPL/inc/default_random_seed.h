@@ -3,8 +3,6 @@
 #ifndef DEFAULT_RANDOM_SEED_H
 #define DEFAULT_RANDOM_SEED_H
 
-#include <stddef.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif

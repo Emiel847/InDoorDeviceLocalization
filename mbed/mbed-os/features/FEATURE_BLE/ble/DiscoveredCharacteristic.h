@@ -537,7 +537,7 @@ public:
      * @return Connection handle to the GattServer, which contains this
      * characteristic.
      */
-    ble::connection_handle_t getConnectionHandle() const
+    Gap::Handle_t getConnectionHandle() const
     {
         return connHandle;
     }
@@ -625,7 +625,7 @@ protected:
     /**
      * Handle of the connection where the characteristic was discovered.
      */
-    ble::connection_handle_t connHandle;
+    Gap::Handle_t connHandle;
 };
 
 /**

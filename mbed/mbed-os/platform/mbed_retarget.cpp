@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include <time.h>
 #include "platform/platform.h"
 #include "platform/FilePath.h"
@@ -55,11 +54,7 @@ static SingletonPtr<PlatformMutex> _mutex;
 #   define PREFIX(x)    _sys##x
 #   define OPEN_MAX     _SYS_OPEN
 #   ifdef __MICROLIB
-#       if __ARMCC_VERSION >= 6010050
-asm(" .global __use_full_stdio\n");
-#       else
-#           pragma import(__use_full_stdio)
-#       endif
+#       pragma import(__use_full_stdio)
 #   endif
 
 #elif defined(__ICCARM__)
@@ -295,7 +290,7 @@ static FileHandle *get_console(int fd)
 }
 
 /* Deal with the fact C library may not _open descriptors 0, 1, 2 - auto bind */
-FileHandle *mbed::mbed_file_handle(int fd)
+static FileHandle *get_fhc(int fd)
 {
     if (fd >= OPEN_MAX) {
         return NULL;
@@ -495,13 +490,13 @@ extern "C" FILEHANDLE PREFIX(_open)(const char *name, int openflags)
     /* Use the posix convention that stdin,out,err are filehandles 0,1,2.
      */
     if (std::strcmp(name, __stdin_name) == 0) {
-        mbed_file_handle(STDIN_FILENO);
+        get_fhc(STDIN_FILENO);
         return STDIN_FILENO;
     } else if (std::strcmp(name, __stdout_name) == 0) {
-        mbed_file_handle(STDOUT_FILENO);
+        get_fhc(STDOUT_FILENO);
         return STDOUT_FILENO;
     } else if (std::strcmp(name, __stderr_name) == 0) {
-        mbed_file_handle(STDERR_FILENO);
+        get_fhc(STDERR_FILENO);
         return STDERR_FILENO;
     }
 #endif
@@ -560,7 +555,7 @@ extern "C" int PREFIX(_close)(FILEHANDLE fh)
 
 extern "C" int close(int fildes)
 {
-    FileHandle *fhc = mbed_file_handle(fildes);
+    FileHandle *fhc = get_fhc(fildes);
     filehandles[fildes] = NULL;
     if (fhc == NULL) {
         errno = EBADF;
@@ -672,7 +667,7 @@ finish:
 extern "C" ssize_t write(int fildes, const void *buf, size_t length)
 {
 
-    FileHandle *fhc = mbed_file_handle(fildes);
+    FileHandle *fhc = get_fhc(fildes);
     if (fhc == NULL) {
         errno = EBADF;
         return -1;
@@ -766,7 +761,8 @@ extern "C" int PREFIX(_read)(FILEHANDLE fh, unsigned char *buffer, unsigned int 
 
 extern "C" ssize_t read(int fildes, void *buf, size_t length)
 {
-    FileHandle *fhc = mbed_file_handle(fildes);
+
+    FileHandle *fhc = get_fhc(fildes);
     if (fhc == NULL) {
         errno = EBADF;
         return -1;
@@ -793,7 +789,7 @@ extern "C" int _isatty(FILEHANDLE fh)
 
 extern "C" int isatty(int fildes)
 {
-    FileHandle *fhc = mbed_file_handle(fildes);
+    FileHandle *fhc = get_fhc(fildes);
     if (fhc == NULL) {
         errno = EBADF;
         return 0;
@@ -832,7 +828,7 @@ int _lseek(FILEHANDLE fh, int offset, int whence)
 
 extern "C" off_t lseek(int fildes, off_t offset, int whence)
 {
-    FileHandle *fhc = mbed_file_handle(fildes);
+    FileHandle *fhc = get_fhc(fildes);
     if (fhc == NULL) {
         errno = EBADF;
         return -1;
@@ -846,23 +842,6 @@ extern "C" off_t lseek(int fildes, off_t offset, int whence)
     return off;
 }
 
-extern "C" int ftruncate(int fildes, off_t length)
-{
-    FileHandle *fhc = mbed_file_handle(fildes);
-    if (fhc == NULL) {
-        errno = EBADF;
-        return -1;
-    }
-
-    int err = fhc->truncate(length);
-    if (err < 0) {
-        errno = -err;
-        return -1;
-    } else {
-        return 0;
-    }
-}
-
 #ifdef __ARMCC_VERSION
 extern "C" int PREFIX(_ensure)(FILEHANDLE fh)
 {
@@ -872,7 +851,7 @@ extern "C" int PREFIX(_ensure)(FILEHANDLE fh)
 
 extern "C" int fsync(int fildes)
 {
-    FileHandle *fhc = mbed_file_handle(fildes);
+    FileHandle *fhc = get_fhc(fildes);
     if (fhc == NULL) {
         errno = EBADF;
         return -1;
@@ -890,7 +869,7 @@ extern "C" int fsync(int fildes)
 #ifdef __ARMCC_VERSION
 extern "C" long PREFIX(_flen)(FILEHANDLE fh)
 {
-    FileHandle *fhc = mbed_file_handle(fh);
+    FileHandle *fhc = get_fhc(fh);
     if (fhc == NULL) {
         errno = EBADF;
         return -1;
@@ -908,56 +887,25 @@ extern "C" long PREFIX(_flen)(FILEHANDLE fh)
     return size;
 }
 
-// Do not compile this code for TFM secure target
-#if !defined(COMPONENT_SPE) || !defined(TARGET_TFM)
-
-#if !defined(__MICROLIB)
-#if defined (__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)
-__asm(".global __use_two_region_memory\n\t");
-__asm(".global __use_no_semihosting\n\t");
-#else
-#pragma import(__use_two_region_memory)
-#endif
-#endif
-
-#if !defined(HEAP_START)
-// Heap here is considered starting after ZI ends to Stack start
-extern uint32_t               Image$$ARM_LIB_STACK$$ZI$$Base[];
-extern uint32_t               Image$$RW_IRAM1$$ZI$$Limit[];
-#define HEAP_START            Image$$RW_IRAM1$$ZI$$Limit
-#define HEAP_SIZE             ((uint32_t)((uint32_t) Image$$ARM_LIB_STACK$$ZI$$Base - (uint32_t) HEAP_START))
-#endif
-
-#define HEAP_LIMIT            ((uint32_t)((uint32_t)HEAP_START + (uint32_t)HEAP_SIZE))
+extern "C" char Image$$RW_IRAM1$$ZI$$Limit[];
 
 extern "C" MBED_WEAK __value_in_regs struct __initial_stackheap _mbed_user_setup_stackheap(uint32_t R0, uint32_t R1, uint32_t R2, uint32_t R3)
 {
-    uint32_t heap_base  = (uint32_t)HEAP_START;
+    uint32_t zi_limit = (uint32_t)Image$$RW_IRAM1$$ZI$$Limit;
+    uint32_t sp_limit = __current_sp();
+
+    zi_limit = (zi_limit + 7) & ~0x7;    // ensure zi_limit is 8-byte aligned
+
     struct __initial_stackheap r;
-
-    // Ensure heap_base is 8-byte aligned
-    heap_base = (heap_base + 7) & ~0x7;
-    r.heap_base = (uint32_t)heap_base;
-    r.heap_limit = (uint32_t)HEAP_LIMIT;
-
+    r.heap_base = zi_limit;
+    r.heap_limit = sp_limit;
     return r;
 }
-
-#if !defined(__MICROLIB)
-extern "C" __value_in_regs struct __argc_argv $Super$$__rt_lib_init(unsigned heapbase, unsigned heaptop);
-
-extern "C" __value_in_regs struct __argc_argv $Sub$$__rt_lib_init(unsigned heapbase, unsigned heaptop)
-{
-    return $Super$$__rt_lib_init((unsigned)HEAP_START, (unsigned)HEAP_LIMIT);
-}
-#endif
 
 extern "C" __value_in_regs struct __initial_stackheap __user_setup_stackheap(uint32_t R0, uint32_t R1, uint32_t R2, uint32_t R3)
 {
     return _mbed_user_setup_stackheap(R0, R1, R2, R3);
 }
-
-#endif // !defined(COMPONENT_SPE) || !defined(TARGET_TFM)
 
 #endif
 
@@ -971,7 +919,7 @@ extern "C" int _fstat(int fh, struct stat *st)
 
 extern "C" int fstat(int fildes, struct stat *st)
 {
-    FileHandle *fhc = mbed_file_handle(fildes);
+    FileHandle *fhc = get_fhc(fildes);
     if (fhc == NULL) {
         errno = EBADF;
         return -1;
@@ -984,7 +932,7 @@ extern "C" int fstat(int fildes, struct stat *st)
 
 extern "C" int fcntl(int fildes, int cmd, ...)
 {
-    FileHandle *fhc = mbed_file_handle(fildes);
+    FileHandle *fhc = get_fhc(fildes);
     if (fhc == NULL) {
         errno = EBADF;
         return -1;
@@ -1029,7 +977,7 @@ extern "C" int poll(struct pollfd fds[], nfds_t nfds, int timeout)
     for (nfds_t n = 0; n < nfds; n++) {
         // Underlying FileHandle poll returns POLLNVAL if given NULL, so
         // we don't need to take special action.
-        fhs[n].fh = mbed_file_handle(fds[n].fd);
+        fhs[n].fh = get_fhc(fds[n].fd);
         fhs[n].events = fds[n].events;
     }
     int ret = poll(fhs, nfds, timeout);
@@ -1238,34 +1186,59 @@ extern "C" WEAK void __cxa_pure_virtual(void)
 // Provide implementation of _sbrk (low-level dynamic memory allocation
 // routine) for GCC_ARM which compares new heap pointer with MSP instead of
 // SP.  This make it compatible with RTX RTOS thread stacks.
-#if defined(TOOLCHAIN_GCC_ARM)
+#if defined(TOOLCHAIN_GCC_ARM) || defined(TOOLCHAIN_GCC_CR)
 
-extern "C" uint32_t         __end__;
-extern "C" uint32_t         __HeapLimit;
+#if defined(TARGET_CORTEX_A)
+extern "C" uint32_t  __HeapLimit;
+#endif
 
 // Turn off the errno macro and use actual global variable instead.
 #undef errno
 extern "C" int errno;
 
+// Dynamic memory allocation related syscall.
+#if defined(TWO_RAM_REGIONS)
+
+// Overwrite _sbrk() to support two region model (heap and stack are two distinct regions).
+// __wrap__sbrk() is implemented in:
+// TARGET_STM32L4               targets/TARGET_STM/TARGET_STM32L4/TARGET_STM32L4/l4_retarget.c
+extern "C" void *__wrap__sbrk(int incr);
+extern "C" caddr_t _sbrk(int incr)
+{
+    return (caddr_t) __wrap__sbrk(incr);
+}
+#else
+// Linker defined symbol used by _sbrk to indicate where heap should start.
+extern "C" uint32_t __end__;
 // Weak attribute allows user to override, e.g. to use external RAM for dynamic memory.
 extern "C" WEAK caddr_t _sbrk(int incr)
 {
-    static uint32_t heap = (uint32_t) &__end__;
-    uint32_t prev_heap = heap;
-    uint32_t new_heap = heap + incr;
+    static unsigned char *heap = (unsigned char *)&__end__;
+    unsigned char        *prev_heap = heap;
+    unsigned char        *new_heap = heap + incr;
 
-    /* __HeapLimit is end of heap section */
-    if (new_heap > (uint32_t) &__HeapLimit) {
+#if defined(TARGET_CORTEX_A)
+    if (new_heap >= (unsigned char *)&__HeapLimit) {    /* __HeapLimit is end of heap section */
+#else
+    if (new_heap >= (unsigned char *)__get_MSP()) {
+#endif
         errno = ENOMEM;
-        return (caddr_t) - 1;
+        return (caddr_t) -1;
+    }
+
+    // Additional heap checking if set
+    if (mbed_heap_size && (new_heap >= mbed_heap_start + mbed_heap_size)) {
+        errno = ENOMEM;
+        return (caddr_t) -1;
     }
 
     heap = new_heap;
     return (caddr_t) prev_heap;
 }
 #endif
+#endif
 
-#if defined(TOOLCHAIN_GCC_ARM)
+#if defined(TOOLCHAIN_GCC_ARM) || defined(TOOLCHAIN_GCC_CR)
 extern "C" void _exit(int return_code)
 {
 #else
@@ -1295,7 +1268,7 @@ extern "C" void exit(int return_code)
     while (1);
 }
 
-#if !defined(TOOLCHAIN_GCC_ARM)
+#if !defined(TOOLCHAIN_GCC_ARM) && !defined(TOOLCHAIN_GCC_CR)
 } //namespace std
 #endif
 
@@ -1427,7 +1400,7 @@ extern "C" void __env_unlock(struct _reent *_r)
 
 #endif
 
-#if defined (__GNUC__) || defined (__ARMCC_VERSION)
+#if defined (__GNUC__) || defined(__CC_ARM) || (defined (__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050))
 
 #define CXA_GUARD_INIT_DONE             (1 << 0)
 #define CXA_GUARD_INIT_IN_PROGRESS      (1 << 1)
@@ -1436,41 +1409,38 @@ extern "C" void __env_unlock(struct _reent *_r)
 extern "C" int __cxa_guard_acquire(int *guard_object_p)
 {
     uint8_t *guard_object = (uint8_t *)guard_object_p;
-    if ((core_util_atomic_load_u8(guard_object) & CXA_GUARD_MASK) == CXA_GUARD_INIT_DONE) {
+    if (CXA_GUARD_INIT_DONE == (*guard_object & CXA_GUARD_MASK)) {
         return 0;
     }
     singleton_lock();
-    uint8_t guard = *guard_object;
-    if ((guard & CXA_GUARD_MASK) == CXA_GUARD_INIT_DONE) {
+    if (CXA_GUARD_INIT_DONE == (*guard_object & CXA_GUARD_MASK)) {
         singleton_unlock();
         return 0;
     }
-    MBED_ASSERT((guard & CXA_GUARD_MASK) == 0);
-    core_util_atomic_store_u8(guard_object, guard | CXA_GUARD_INIT_IN_PROGRESS);
+    MBED_ASSERT(0 == (*guard_object & CXA_GUARD_MASK));
+    *guard_object = *guard_object | CXA_GUARD_INIT_IN_PROGRESS;
     return 1;
 }
 
 extern "C" void __cxa_guard_release(int *guard_object_p)
 {
     uint8_t *guard_object = (uint8_t *)guard_object_p;
-    uint8_t guard = *guard_object;
-    MBED_ASSERT((guard & CXA_GUARD_MASK) == CXA_GUARD_INIT_IN_PROGRESS);
-    core_util_atomic_store_u8(guard_object, (guard & ~CXA_GUARD_MASK) | CXA_GUARD_INIT_DONE);
+    MBED_ASSERT(CXA_GUARD_INIT_IN_PROGRESS == (*guard_object & CXA_GUARD_MASK));
+    *guard_object = (*guard_object & ~CXA_GUARD_MASK) | CXA_GUARD_INIT_DONE;
     singleton_unlock();
 }
 
 extern "C" void __cxa_guard_abort(int *guard_object_p)
 {
     uint8_t *guard_object = (uint8_t *)guard_object_p;
-    uint8_t guard = *guard_object;
-    MBED_ASSERT((guard & CXA_GUARD_MASK) == CXA_GUARD_INIT_IN_PROGRESS);
-    core_util_atomic_store_u8(guard_object, guard & ~CXA_GUARD_INIT_IN_PROGRESS);
+    MBED_ASSERT(CXA_GUARD_INIT_IN_PROGRESS == (*guard_object & CXA_GUARD_MASK));
+    *guard_object = *guard_object & ~CXA_GUARD_INIT_IN_PROGRESS;
     singleton_unlock();
 }
 
 #endif
 
-#if defined(MBED_MEM_TRACING_ENABLED) && (defined(__ARMCC_VERSION) || defined(__ICCARM__))
+#if defined(MBED_MEM_TRACING_ENABLED) && (defined(__CC_ARM) || defined(__ICCARM__) || (defined (__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)))
 
 // If the memory tracing is enabled, the wrappers in mbed_alloc_wrappers.cpp
 // provide the implementation for these. Note: this needs to use the wrappers

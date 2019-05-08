@@ -100,7 +100,6 @@ ConnectionParameters &ConnectionParameters::setConnectionParameters(
     return *this;
 }
 
-#if BLE_FEATURE_PHY_MANAGEMENT
 /** Handle the swapping of 2M and CODED so that the array is ready for the pal call. */
 void ConnectionParameters::swapCodedAnd2M()
 {
@@ -131,6 +130,5 @@ void ConnectionParameters::swapCodedAnd2M()
     _minEventLength[LE_CODED_INDEX] = minEventLength;
     _maxEventLength[LE_CODED_INDEX] = maxEventLength;
 }
-#endif // BLE_FEATURE_PHY_MANAGEMENT
 
 } // namespace ble

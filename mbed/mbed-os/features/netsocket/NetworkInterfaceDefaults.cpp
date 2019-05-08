@@ -62,53 +62,6 @@ MBED_WEAK NetworkInterface *NetworkInterface::get_default_instance()
     return get_target_default_instance();
 }
 
-
-/* Helpers to set default parameters - used by NetworkInterface::get_default_instance,
- * but exposed for apps which want to get these defaults after requesting a specific type.
- */
-void NetworkInterface::set_default_parameters()
-{
-
-}
-
-void WiFiInterface::set_default_parameters()
-{
-#ifdef MBED_CONF_NSAPI_DEFAULT_WIFI_SSID
-#ifndef MBED_CONF_NSAPI_DEFAULT_WIFI_PASSWORD
-#define MBED_CONF_NSAPI_DEFAULT_WIFI_PASSWORD NULL
-#endif
-#ifndef MBED_CONF_NSAPI_DEFAULT_WIFI_SECURITY
-#define MBED_CONF_NSAPI_DEFAULT_WIFI_SECURITY NONE
-#endif
-#define concat_(x,y) x##y
-#define concat(x,y) concat_(x,y)
-#define SECURITY concat(NSAPI_SECURITY_,MBED_CONF_NSAPI_DEFAULT_WIFI_SECURITY)
-    set_credentials(MBED_CONF_NSAPI_DEFAULT_WIFI_SSID, MBED_CONF_NSAPI_DEFAULT_WIFI_PASSWORD, SECURITY);
-#endif
-}
-
-void CellularBase::set_default_parameters()
-{
-    /* CellularBase is expected to attempt to work without any parameters - we
-     * will try, at least.
-     */
-#ifdef MBED_CONF_NSAPI_DEFAULT_CELLULAR_APN
-#ifndef MBED_CONF_NSAPI_DEFAULT_CELLULAR_USERNAME
-#define MBED_CONF_NSAPI_DEFAULT_CELLULAR_USERNAME NULL
-#endif
-#ifndef MBED_CONF_NSAPI_DEFAULT_CELLULAR_PASSWORD
-#define MBED_CONF_NSAPI_DEFAULT_CELLULAR_PASSWORD NULL
-#endif
-    set_credentials(MBED_CONF_NSAPI_DEFAULT_CELLULAR_APN, MBED_CONF_NSAPI_DEFAULT_CELLULAR_USERNAME, MBED_CONF_NSAPI_DEFAULT_CELLULAR_PASSWORD);
-#endif
-#ifdef MBED_CONF_NSAPI_DEFAULT_CELLULAR_SIM_PIN
-    set_sim_pin(MBED_CONF_NSAPI_DEFAULT_CELLULAR_SIM_PIN);
-#endif
-#ifdef MBED_CONF_NSAPI_DEFAULT_CELLULAR_PLMN
-    set_plmn(MBED_CONF_NSAPI_DEFAULT_CELLULAR_PLMN);
-#endif
-}
-
 /* Finally the dispatch from the JSON default interface type to the specific
  * subclasses. It's our job to configure - the default NetworkInterface is
  * preconfigured - the specific subtypes' defaults are not (necessarily).
@@ -134,7 +87,16 @@ MBED_WEAK NetworkInterface *NetworkInterface::get_target_default_instance()
     if (!wifi) {
         return NULL;
     }
-    wifi->set_default_parameters();
+#ifndef MBED_CONF_NSAPI_DEFAULT_WIFI_PASSWORD
+#define MBED_CONF_NSAPI_DEFAULT_WIFI_PASSWORD NULL
+#endif
+#ifndef MBED_CONF_NSAPI_DEFAULT_WIFI_SECURITY
+#define MBED_CONF_NSAPI_DEFAULT_WIFI_SECURITY NONE
+#endif
+#define concat_(x,y) x##y
+#define concat(x,y) concat_(x,y)
+#define SECURITY concat(NSAPI_SECURITY_,MBED_CONF_NSAPI_DEFAULT_WIFI_SECURITY)
+    wifi->set_credentials(MBED_CONF_NSAPI_DEFAULT_WIFI_SSID, MBED_CONF_NSAPI_DEFAULT_WIFI_PASSWORD, SECURITY);
     return wifi;
 #else
     return NULL;
@@ -152,7 +114,24 @@ MBED_WEAK NetworkInterface *NetworkInterface::get_target_default_instance()
     if (!cellular) {
         return NULL;
     }
-    cellular->set_default_parameters();
+    /* CellularBase is expected to attempt to work without any parameters - we
+     * will try, at least.
+     */
+#ifdef MBED_CONF_NSAPI_DEFAULT_CELLULAR_APN
+#ifndef MBED_CONF_NSAPI_DEFAULT_CELLULAR_USERNAME
+#define MBED_CONF_NSAPI_DEFAULT_CELLULAR_USERNAME NULL
+#endif
+#ifndef MBED_CONF_NSAPI_DEFAULT_CELLULAR_PASSWORD
+#define MBED_CONF_NSAPI_DEFAULT_CELLULAR_PASSWORD NULL
+#endif
+    cellular->set_credentials(MBED_CONF_NSAPI_DEFAULT_CELLULAR_APN, MBED_CONF_NSAPI_DEFAULT_CELLULAR_USERNAME, MBED_CONF_NSAPI_DEFAULT_CELLULAR_PASSWORD);
+#endif
+#ifdef MBED_CONF_NSAPI_DEFAULT_CELLULAR_SIM_PIN
+    cellular->set_sim_pin(MBED_CONF_NSAPI_DEFAULT_CELLULAR_SIM_PIN);
+#endif
+#ifdef MBED_CONF_NSAPI_DEFAULT_CELLULAR_PLMN
+    cellular->set_plmn(MBED_CONF_NSAPI_DEFAULT_CELLULAR_PLMN);
+#endif
     return cellular;
 }
 #elif defined(MBED_CONF_TARGET_NETWORK_DEFAULT_INTERFACE_TYPE)

@@ -19,8 +19,6 @@
 
 #include "ble/BLE.h"
 
-#if BLE_FEATURE_GATT_SERVER
-
 /**
  * BLE Heart Rate Service.
  *
@@ -229,7 +227,5 @@ protected:
     GattCharacteristic hrmRate;
     ReadOnlyGattCharacteristic<uint8_t> hrmLocation;
 };
-
-#endif // BLE_FEATURE_GATT_SERVER
 
 #endif /* #ifndef MBED_BLE_HEART_RATE_SERVICE_H__*/

@@ -26,7 +26,10 @@ typedef struct trace_s {
     void (*mutex_release_f)(void);
 } trace_t;
 
-static trace_t m_trace = {};
+static trace_t m_trace = {
+    .mutex_wait_f = 0,
+    .mutex_release_f = 0,
+};
 
 void mutex_wait_function_set(void (*mutex_wait_f)(void))
 {

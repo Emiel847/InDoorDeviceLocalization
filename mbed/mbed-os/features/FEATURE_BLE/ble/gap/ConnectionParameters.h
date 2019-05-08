@@ -123,11 +123,7 @@ class ConnectionParameters {
         LE_1M_INDEX = 0,
         LE_2M_INDEX = 1,
         LE_CODED_INDEX = 2,
-#if BLE_FEATURE_PHY_MANAGEMENT
         MAX_PARAM_PHYS = 3
-#else
-        MAX_PARAM_PHYS = 1
-#endif // BLE_FEATURE_PHY_MANAGEMENT
     };
 
 public:
@@ -221,9 +217,8 @@ public:
      */
     ConnectionParameters &setFilter(initiator_filter_policy_t filterPolicy)
     {
-#if BLE_FEATURE_WHITELIST
         _filterPolicy = filterPolicy;
-#endif // BLE_FEATURE_WHITELIST
+
         return *this;
     }
 
@@ -238,11 +233,9 @@ public:
      */
     ConnectionParameters &togglePhy(bool phy1M, bool phy2M, bool phyCoded)
     {
-#if BLE_FEATURE_PHY_MANAGEMENT
         handlePhyToggle(phy_t::LE_1M, phy1M);
         handlePhyToggle(phy_t::LE_2M, phy2M);
         handlePhyToggle(phy_t::LE_CODED, phyCoded);
-#endif // BLE_FEATURE_PHY_MANAGEMENT
         return *this;
     }
 
@@ -255,9 +248,7 @@ public:
      */
     ConnectionParameters &disablePhy(phy_t phy = phy_t::LE_1M)
     {
-#if BLE_FEATURE_PHY_MANAGEMENT
         handlePhyToggle(phy, false);
-#endif // BLE_FEATURE_PHY_MANAGEMENT
         return *this;
     }
 
@@ -270,9 +261,7 @@ public:
      */
     ConnectionParameters &enablePhy(phy_t phy = phy_t::LE_1M)
     {
-#if BLE_FEATURE_PHY_MANAGEMENT
         handlePhyToggle(phy, true);
-#endif // BLE_FEATURE_PHY_MANAGEMENT
         return *this;
     }
 
@@ -295,11 +284,7 @@ public:
      */
     initiator_filter_policy_t getFilter() const
     {
-#if BLE_FEATURE_WHITELIST
         return _filterPolicy;
-#else
-        return initiator_filter_policy_t::NO_FILTER;
-#endif // BLE_FEATURE_WHITELIST
     }
 
     /**
@@ -309,11 +294,9 @@ public:
     uint8_t getNumberOfEnabledPhys() const
     {
         return (
-            _enabledPhy[LE_1M_INDEX] * 1
-#if BLE_FEATURE_PHY_MANAGEMENT
-            + _enabledPhy[LE_2M_INDEX] * 1
-            + _enabledPhy[LE_CODED_INDEX] * 1
-#endif // BLE_FEATURE_PHY_MANAGEMENT
+            _enabledPhy[LE_1M_INDEX] * 1 +
+            _enabledPhy[LE_2M_INDEX] * 1 +
+            _enabledPhy[LE_CODED_INDEX] * 1
         );
     }
 
@@ -321,18 +304,13 @@ public:
 
     phy_set_t getPhySet() const
     {
-#if BLE_FEATURE_PHY_MANAGEMENT
         phy_set_t set(
             _enabledPhy[LE_1M_INDEX],
             _enabledPhy[LE_2M_INDEX],
             _enabledPhy[LE_CODED_INDEX]
         );
         return set;
-#else
-        return phy_set_t::PHY_SET_1M;
-#endif // BLE_FEATURE_PHY_MANAGEMENT
     }
-
 
     /* These return pointers to arrays of settings valid only across the number of active PHYs */
 
@@ -381,7 +359,6 @@ public:
 private:
     uint8_t getFirstEnabledIndex() const
     {
-#if BLE_FEATURE_PHY_MANAGEMENT
         if (_enabledPhy[LE_1M_INDEX]) {
             return LE_1M_INDEX;
         } else if (_enabledPhy[LE_2M_INDEX]) {
@@ -392,7 +369,6 @@ private:
         /* This should never happen; it means you were trying to start a connection with a blank set
          * of parameters - you need to enable at least one PHY */
         MBED_ASSERT("Trying to use connection parameters without any PHY defined.");
-#endif // BLE_FEATURE_PHY_MANAGEMENT
         return 0;
     }
 
@@ -406,7 +382,6 @@ private:
     {
         uint8_t index = phyToIndex(phy);
 
-#if BLE_FEATURE_PHY_MANAGEMENT
         bool was_swapped = isSwapped();
 
         _enabledPhy[index] = enable;
@@ -421,7 +396,6 @@ private:
             /* To keep the data contiguous, coded params are in place of the missing 2M params */
             index = LE_2M_INDEX;
         }
-#endif // BLE_FEATURE_PHY_MANAGEMENT
 
         return index;
     }
@@ -433,23 +407,20 @@ private:
             case phy_t::LE_1M:
                 index = LE_1M_INDEX;
                 break;
-#if BLE_FEATURE_PHY_MANAGEMENT
             case phy_t::LE_2M:
                 index = LE_2M_INDEX;
                 break;
             case phy_t::LE_CODED:
                 index = LE_CODED_INDEX;
                 break;
-#endif // BLE_FEATURE_PHY_MANAGEMENT
             default:
-                index = LE_1M_INDEX;
+                index = MAX_PARAM_PHYS;
                 MBED_ASSERT("Illegal PHY");
                 break;
         }
         return index;
     }
 
-#if BLE_FEATURE_PHY_MANAGEMENT
     bool isSwapped() const
     {
         return (
@@ -461,7 +432,6 @@ private:
 
     /** Handle the swapping of 2M and CODED so that the array is ready for the pal call. */
     void swapCodedAnd2M();
-#endif // BLE_FEATURE_PHY_MANAGEMENT
 
 private:
     initiator_filter_policy_t _filterPolicy;

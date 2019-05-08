@@ -17,13 +17,11 @@
 #ifndef MBED_BLE_H__
 #define MBED_BLE_H__
 
-#include "BLERoles.h"
-
 #include "blecommon.h"
 #include "ble/Gap.h"
-#include "ble/GattServer.h"
-#include "ble/GattClient.h"
-#include "ble/SecurityManager.h"
+#include "GattServer.h"
+#include "GattClient.h"
+#include "SecurityManager.h"
 
 #include "ble/FunctionPointerWithContext.h"
 
@@ -357,7 +355,6 @@ public:
      */
     const Gap &gap() const;
 
-#if BLE_FEATURE_GATT_SERVER
     /**
      * Accessor to GattServer. All GattServer related functionality requires
      * going through this accessor.
@@ -373,9 +370,7 @@ public:
      * instance.
      */
     const GattServer &gattServer() const;
-#endif // BLE_FEATURE_GATT_SERVER
 
-#if BLE_FEATURE_GATT_CLIENT
     /**
      * Accessors to GattClient. All GattClient related functionality requires
      * going through this accessor.
@@ -391,9 +386,7 @@ public:
      * instance.
      */
     const GattClient &gattClient() const;
-#endif // BLE_FEATURE_GATT_CLIENT
 
-#if BLE_FEATURE_SECURITY
     /**
      * Accessors to SecurityManager. All SecurityManager-related functionality
      * requires going through this accessor.
@@ -410,7 +403,6 @@ public:
      * BLE instance.
      */
     const SecurityManager &securityManager() const;
-#endif // BLE_FEATURE_SECURITY
 
     /**
      * Translate error code into a printable string.
@@ -497,7 +489,6 @@ public:
         return gap().getAddress(typeP, address);
     }
 
-#if BLE_ROLE_BROADCASTER
     /**
      * Set the GAP advertising mode to use for this device.
      *
@@ -843,9 +834,7 @@ public:
      */
     MBED_DEPRECATED("Use ble.gap().stopAdvertising(...)")
     ble_error_t stopAdvertising(void);
-#endif // BLE_ROLE_BROADCASTER
 
-#if BLE_ROLE_OBSERVER
     /**
      * Set up parameters for GAP scanning (observer mode).
      *
@@ -1043,9 +1032,7 @@ public:
     {
         return gap().stopScan();
     }
-#endif // BLE_ROLE_OBSERVER
 
-#if BLE_ROLE_CENTRAL
     /**
      * Create a connection (GAP Link Establishment).
      *
@@ -1074,9 +1061,7 @@ public:
         const Gap::ConnectionParams_t *connectionParams = NULL,
         const GapScanningParams *scanParams = NULL
     );
-#endif // BLE_ROLE_CENTRAL
 
-#if BLE_FEATURE_CONNECTABLE
     /**
      * This call initiates the disconnection procedure, and its completion is
      * communicated to the application with an invocation of the
@@ -1119,7 +1104,6 @@ public:
      */
     MBED_DEPRECATED("Use ble.gap().disconnect(...)")
     ble_error_t disconnect(Gap::DisconnectionReason_t reason);
-#endif // BLE_FEATURE_CONNECTABLE
 
     /**
      * Returns the current Gap state of the device using a bitmask that
@@ -1135,8 +1119,6 @@ public:
     MBED_DEPRECATED("Use ble.gap().getState()")
     Gap::GapState_t getGapState(void) const;
 
-#if BLE_FEATURE_CONNECTABLE
-#if BLE_FEATURE_GATT_SERVER
     /**
      * Get the GAP peripheral's preferred connection parameters. These are the
      * defaults that the peripheral would like to have in a connection. The
@@ -1181,7 +1163,6 @@ public:
     {
         return gap().setPreferredConnectionParams(params);
     }
-#endif // BLE_FEATURE_GATT_SERVER
 
     /**
      * Update connection parameters while in the peripheral role.
@@ -1204,9 +1185,7 @@ public:
      */
     MBED_DEPRECATED("Use ble.gap().updateConnectionParams(...)")
     ble_error_t updateConnectionParams(Gap::Handle_t handle, const Gap::ConnectionParams_t *params);
-#endif // BLE_FEATURE_CONNECTABLE
 
-#if BLE_FEATURE_GATT_SERVER
     /**
      * Set the device name characteristic in the Gap service.
      *
@@ -1297,7 +1276,6 @@ public:
     {
         return gap().getAppearance(appearanceP);
     }
-#endif // BLE_FEATURE_GATT_SERVER
 
     /**
      * Set the radio's transmit power.
@@ -1331,7 +1309,6 @@ public:
     MBED_DEPRECATED("Use ble.gap().getPermittedTxPowerValues(...)")
     void getPermittedTxPowerValues(const int8_t **valueArrayPP, size_t *countP);
 
-#if BLE_FEATURE_GATT_SERVER
     /**
      * Add a service declaration to the local server ATT table. Also add the
      * characteristics contained within.
@@ -1490,9 +1467,7 @@ public:
     {
         return gattServer().write(connectionHandle, attributeHandle, value, size, localOnly);
     }
-#endif // BLE_FEATURE_GATT_SERVER
 
-#if BLE_FEATURE_SECURITY
     /**
      * Enable the BLE stack's Security Manager. The Security Manager implements
      * the cryptographic algorithms and protocol exchanges that allow two
@@ -1561,7 +1536,6 @@ public:
     {
         return securityManager().purgeAllBondingState();
     }
-#endif // BLE_FEATURE_SECURITY
 
     /**
      * Set up a callback for timeout events. Refer to Gap::TimeoutSource_t for
@@ -1577,7 +1551,6 @@ public:
     MBED_DEPRECATED("ble.gap().onTimeout(callback)")
     void onTimeout(Gap::TimeoutEventCallback_t timeoutCallback);
 
-#if BLE_FEATURE_CONNECTABLE
     /**
      * Set up a callback for connection events. Refer to Gap::ConnectionEventCallback_t.
      *
@@ -1622,7 +1595,6 @@ public:
     {
         gap().onDisconnection(tptr, mptr);
     }
-#endif // BLE_FEATURE_CONNECTABLE
 
     /**
      * Radio Notification is a feature that enables ACTIVE and INACTIVE
@@ -1648,7 +1620,6 @@ public:
     MBED_DEPRECATED("ble.gap().onRadioNotification(...)")
     void onRadioNotification(void (*callback)(bool));
 
-#if BLE_FEATURE_GATT_SERVER
     /**
      * Add a callback for the GATT event DATA_SENT (which is triggered when
      * updates are sent out by GATT in the form of notifications).
@@ -1850,9 +1821,7 @@ public:
     {
         gattServer().onConfirmationReceived(callback);
     }
-#endif // BLE_FEATURE_GATT_SERVER
 
-#if BLE_FEATURE_SECURITY
     /**
      * Set up a callback for when the security setup procedure (key generation
      * and exchange) for a link has started. This will be skipped for bonded
@@ -1949,7 +1918,6 @@ public:
     {
         return securityManager().onPasskeyDisplay(callback);
     }
-#endif // BLE_FEATURE_SECURITY
 
 private:
     friend class BLEInstanceBase;

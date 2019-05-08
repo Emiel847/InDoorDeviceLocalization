@@ -17,8 +17,6 @@
 #ifndef MBED_BLE_GAP_H__
 #define MBED_BLE_GAP_H__
 
-#include "BLERoles.h"
-#include "ble/common/StaticInterface.h"
 #include "BLETypes.h"
 #include "BLEProtocol.h"
 #include "ble/GapAdvertisingData.h"
@@ -31,7 +29,6 @@
 #include "platform/mbed_toolchain.h"
 
 #include "ble/gap/Gap.h"
-#include "BleImplementationForward.h"
 
 /**
  * @addtogroup ble
@@ -40,42 +37,19 @@
  * @{
  */
 
-#if !defined(DOXYGEN_ONLY)
-namespace ble {
-namespace interface {
-#endif
-
 /**
  * @copydoc ble::Gap
  */
-#if defined(DOXYGEN_ONLY)
 class Gap : public ble::Gap {
-#else
-template<class Impl>
-class LegacyGap :
-    public ble::StaticInterface<Impl, LegacyGap>,
-    public ble::interface::Gap<Impl>
-{
-#endif
-    using ble::StaticInterface<Impl, ::ble::interface::LegacyGap>::impl;
-
 public:
-#if BLE_ROLE_BROADCASTER
-    using ble::interface::Gap<Impl>::setAdvertisingParameters;
-    using ble::interface::Gap<Impl>::setAdvertisingPayload;
-    using ble::interface::Gap<Impl>::setAdvertisingScanResponse;
-    using ble::interface::Gap<Impl>::startAdvertising;
-    using ble::interface::Gap<Impl>::stopAdvertising;
-#endif // BLE_ROLE_BROADCASTER
-#if BLE_ROLE_CENTRAL
-    using ble::interface::Gap<Impl>::connect;
-#endif
-#if BLE_FEATURE_CONNECTABLE
-    using ble::interface::Gap<Impl>::disconnect;
-#endif
-#if BLE_ROLE_OBSERVER
-    using ble::interface::Gap<Impl>::startScan;
-#endif
+    using ble::Gap::setAdvertisingParameters;
+    using ble::Gap::setAdvertisingPayload;
+    using ble::Gap::setAdvertisingScanResponse;
+    using ble::Gap::startAdvertising;
+    using ble::Gap::stopAdvertising;
+    using ble::Gap::connect;
+    using ble::Gap::disconnect;
+    using ble::Gap::startScan;
 
     /**
      * Address-type for BLEProtocol addresses.
@@ -764,14 +738,14 @@ public:
      *
      * @see Gap::onShutdown().
      */
-    typedef FunctionPointerWithContext<const LegacyGap *> GapShutdownCallback_t;
+    typedef FunctionPointerWithContext<const Gap *> GapShutdownCallback_t;
 
     /**
      * Callchain of gap shutdown event handler.
      *
      * @see Gap::onShutdown().
      */
-    typedef CallChainOfFunctionPointersWithContext<const LegacyGap *>
+    typedef CallChainOfFunctionPointersWithContext<const Gap *>
         GapShutdownCallbackChain_t;
 
     /*
@@ -816,7 +790,7 @@ public:
         "mbed-os-5.9.0",
         "Non portable API, use enablePrivacy to enable use of private addresses"
     )
-    ble_error_t setAddress(
+    virtual ble_error_t setAddress(
         BLEProtocol::AddressType_t type,
         const BLEProtocol::AddressBytes_t address
     );
@@ -832,7 +806,7 @@ public:
      *
      * @return BLE_ERROR_NONE on success.
      */
-    ble_error_t getAddress(
+    virtual ble_error_t getAddress(
         BLEProtocol::AddressType_t *typeP,
         BLEProtocol::AddressBytes_t address
     );
@@ -853,7 +827,6 @@ public:
         RandomAddressType_t *addressType
     );
 
-#if BLE_ROLE_BROADCASTER
     /**
      * Get the minimum advertising interval in milliseconds, which can be used
      * for connectable advertising types.
@@ -861,7 +834,12 @@ public:
      * @return Minimum Advertising interval in milliseconds for connectable
      * undirected and connectable directed advertising types.
      */
-    uint16_t getMinAdvertisingInterval(void) const;
+    virtual uint16_t getMinAdvertisingInterval(void) const
+    {
+        /* Requesting action from porter(s): override this API if this capability
+           is supported. */
+        return 0;
+    }
 
     /**
      * Get the minimum advertising interval in milliseconds, which can be
@@ -870,14 +848,24 @@ public:
      * @return Minimum Advertising interval in milliseconds for scannable
      * undirected and nonconnectable undirected event types.
      */
-    uint16_t getMinNonConnectableAdvertisingInterval(void) const;
+    virtual uint16_t getMinNonConnectableAdvertisingInterval(void) const
+    {
+        /* Requesting action from porter(s): override this API if this capability
+           is supported. */
+        return 0;
+    }
 
     /**
      * Get the maximum advertising interval in milliseconds.
      *
      * @return Maximum Advertising interval in milliseconds.
      */
-    uint16_t getMaxAdvertisingInterval(void) const;
+    virtual uint16_t getMaxAdvertisingInterval(void) const
+    {
+        /* Requesting action from porter(s): override this API if this capability
+           is supported. */
+        return 0xFFFF;
+    }
 
     /**
      * Stop the ongoing advertising procedure.
@@ -895,9 +883,8 @@ public:
         "Deprecated since addition of extended advertising support."
         "Use stopAdvertising(advertising_handle_t) instead."
     )
-    ble_error_t stopAdvertising(void);
-#endif //BLE_ROLE_BROADCASTER
-#if BLE_ROLE_CENTRAL
+    virtual ble_error_t stopAdvertising(void);
+
     /**
      * Initiate a connection to a peer.
      *
@@ -922,7 +909,7 @@ public:
         "Deprecated since addition of extended advertising support."
         "Use connect(target_peer_address_type_t, address_t, ConnectionParameters) instead."
     )
-    ble_error_t connect(
+    virtual ble_error_t connect(
         const BLEProtocol::AddressBytes_t peerAddr,
         PeerAddressType_t peerAddrType,
         const ConnectionParams_t *connectionParams,
@@ -953,7 +940,7 @@ public:
         "This function won't work if privacy is enabled; You must use the overload "
         "accepting PeerAddressType_t."
     )
-    ble_error_t connect(
+    virtual ble_error_t connect(
         const BLEProtocol::AddressBytes_t peerAddr,
         BLEProtocol::AddressType_t peerAddrType,
         const ConnectionParams_t *connectionParams,
@@ -981,9 +968,7 @@ public:
         const ConnectionParams_t *connectionParams,
         const GapScanningParams *scanParams
     );
-#endif // BLE_ROLE_CENTRAL
 
-#if BLE_FEATURE_CONNECTABLE
     /**
      * Initiate a disconnection procedure.
      *
@@ -1005,7 +990,7 @@ public:
         "Deprecated since addition of extended advertising support."
         "Use disconnect(connection_handle_t, local_disconnection_reason_t) instead."
     )
-    ble_error_t disconnect(
+    virtual ble_error_t disconnect(
         Handle_t connectionHandle, DisconnectionReason_t reason
     );
 
@@ -1022,7 +1007,7 @@ public:
      * @return BLE_ERROR_NONE if disconnection was successful.
      */
     MBED_DEPRECATED("Use disconnect(Handle_t, DisconnectionReason_t) instead.")
-    ble_error_t disconnect(DisconnectionReason_t reason);
+    virtual ble_error_t disconnect(DisconnectionReason_t reason);
 
 public:
 
@@ -1035,7 +1020,15 @@ public:
      * @return BLE_ERROR_NONE if the parameters were successfully filled into
      * @p params.
      */
-    ble_error_t getPreferredConnectionParams(ConnectionParams_t *params);
+    virtual ble_error_t getPreferredConnectionParams(ConnectionParams_t *params)
+    {
+        /* Avoid compiler warnings about unused variables. */
+        (void) params;
+
+        /* Requesting action from porter(s): override this API if this capability
+           is supported. */
+        return BLE_ERROR_NOT_IMPLEMENTED;
+    }
 
     /**
      * Set the value of the preferred connection parameters exposed in the GATT
@@ -1050,9 +1043,17 @@ public:
      * @return BLE_ERROR_NONE if the preferred connection params were set
      * correctly.
      */
-    ble_error_t setPreferredConnectionParams(
+    virtual ble_error_t setPreferredConnectionParams(
         const ConnectionParams_t *params
-    );
+    )
+    {
+        /* Avoid compiler warnings about unused variables. */
+        (void) params;
+
+        /* Requesting action from porter(s): override this API if this capability
+           is supported. */
+        return BLE_ERROR_NOT_IMPLEMENTED;
+    }
 
     /**
      * Update connection parameters of an existing connection.
@@ -1078,12 +1079,11 @@ public:
         "conn_interval_t, slave_latency_t, supervision_timeout_t, "
         "conn_event_length_t, conn_event_length_t) instead."
     )
-    ble_error_t updateConnectionParams(
+    virtual ble_error_t updateConnectionParams(
         Handle_t handle,
         const ConnectionParams_t *params
     );
-#endif // BLE_FEATURE_CONNECTABLE
-#if BLE_FEATURE_GATT_SERVER
+
     /**
      * Set the value of the device name characteristic in the Generic Access
      * Service.
@@ -1093,7 +1093,15 @@ public:
      *
      * @return BLE_ERROR_NONE if the device name was set correctly.
      */
-    ble_error_t setDeviceName(const uint8_t *deviceName);
+    virtual ble_error_t setDeviceName(const uint8_t *deviceName)
+    {
+        /* Avoid compiler warnings about unused variables. */
+        (void) deviceName;
+
+        /* Requesting action from porter(s): override this API if this capability
+           is supported. */
+        return BLE_ERROR_NOT_IMPLEMENTED;
+    }
 
     /**
      * Get the value of the device name characteristic in the Generic Access
@@ -1117,7 +1125,16 @@ public:
      * bytes actually returned in deviceName. The application may use this
      * information to retry with a suitable buffer size.
      */
-    ble_error_t getDeviceName(uint8_t *deviceName, unsigned *lengthP);
+    virtual ble_error_t getDeviceName(uint8_t *deviceName, unsigned *lengthP)
+    {
+        /* avoid compiler warnings about unused variables */
+        (void) deviceName;
+        (void) lengthP;
+
+        /* Requesting action from porter(s): override this API if this capability
+           is supported. */
+        return BLE_ERROR_NOT_IMPLEMENTED;
+    }
 
     /**
      * Set the value of the appearance characteristic in the GAP service.
@@ -1126,7 +1143,15 @@ public:
      *
      * @return BLE_ERROR_NONE if the new appearance was set correctly.
      */
-    ble_error_t setAppearance(GapAdvertisingData::Appearance appearance);
+    virtual ble_error_t setAppearance(GapAdvertisingData::Appearance appearance)
+    {
+        /* Avoid compiler warnings about unused variables. */
+        (void) appearance;
+
+        /* Requesting action from porter(s): override this API if this capability
+           is supported. */
+        return BLE_ERROR_NOT_IMPLEMENTED;
+    }
 
     /**
      * Get the value of the appearance characteristic in the GAP service.
@@ -1136,8 +1161,15 @@ public:
      * @return BLE_ERROR_NONE if the device-appearance was fetched correctly
      * from the underlying BLE stack.
      */
-    ble_error_t getAppearance(GapAdvertisingData::Appearance *appearanceP);
-#endif // BLE_FEATURE_GATT_SERVER
+    virtual ble_error_t getAppearance(GapAdvertisingData::Appearance *appearanceP)
+    {
+        /* Avoid compiler warnings about unused variables. */
+        (void) appearanceP;
+
+        /* Requesting action from porter(s): override this API if this capability
+           is supported. */
+        return BLE_ERROR_NOT_IMPLEMENTED;
+    }
 
     /**
      * Set the radio's transmit power.
@@ -1155,7 +1187,7 @@ public:
         "Deprecated since addition of extended advertising support."
         "See ble::AdvertisingParameters and setAdvertisingParameters."
     )
-    ble_error_t setTxPower(int8_t txPower);
+    virtual ble_error_t setTxPower(int8_t txPower);
 
     /**
      * Query the underlying stack for allowed Tx power values.
@@ -1169,11 +1201,10 @@ public:
         "mbed-os-5.11.0",
         "Deprecated since addition of extended advertising support."
     )
-    void getPermittedTxPowerValues(
+    virtual void getPermittedTxPowerValues(
         const int8_t **valueArrayPP, size_t *countP
     );
 
-#if BLE_FEATURE_WHITELIST
     /**
      * Get the maximum size of the whitelist.
      *
@@ -1182,7 +1213,7 @@ public:
      * @note If using Mbed OS, you can configure the size of the whitelist by
      * setting the YOTTA_CFG_WHITELIST_MAX_SIZE macro in your yotta config file.
      */
-    uint8_t getMaxWhitelistSize(void) const;
+    virtual uint8_t getMaxWhitelistSize(void) const;
 
     /**
      * Get the Link Layer to use the internal whitelist when scanning,
@@ -1194,7 +1225,7 @@ public:
      * @return BLE_ERROR_NONE if the implementation's whitelist was successfully
      * copied into the supplied reference.
      */
-    ble_error_t getWhitelist(Whitelist_t &whitelist) const;
+    virtual ble_error_t getWhitelist(Whitelist_t &whitelist) const;
 
     /**
      * Set the value of the whitelist to be used during GAP procedures.
@@ -1214,7 +1245,7 @@ public:
      * @note If the input whitelist is larger than @ref getMaxWhitelistSize(),
      * then @ref BLE_ERROR_PARAM_OUT_OF_RANGE is returned.
      */
-    ble_error_t setWhitelist(const Whitelist_t &whitelist);
+    virtual ble_error_t setWhitelist(const Whitelist_t &whitelist);
 
     /**
      * Set the advertising policy filter mode to be used during the next
@@ -1233,7 +1264,7 @@ public:
         "Deprecated since addition of extended advertising support."
         "This setting is now part of ble::AdvertisingParameters."
     )
-    ble_error_t setAdvertisingPolicyMode(AdvertisingPolicyMode_t mode);
+    virtual ble_error_t setAdvertisingPolicyMode(AdvertisingPolicyMode_t mode);
 
     /**
      * Set the scan policy filter mode to be used during the next scan procedure.
@@ -1251,7 +1282,7 @@ public:
         "Deprecated since addition of extended advertising support."
         "This setting is now part of ble::ScanParameters."
     )
-    ble_error_t setScanningPolicyMode(ScanningPolicyMode_t mode);
+    virtual ble_error_t setScanningPolicyMode(ScanningPolicyMode_t mode);
 
     /**
      * Set the initiator policy filter mode to be used during the next connection
@@ -1270,7 +1301,7 @@ public:
         "Deprecated since addition of extended advertising support."
         "This setting is now part of ble::ConnectionParameters."
     )
-    ble_error_t setInitiatorPolicyMode(InitiatorPolicyMode_t mode);
+    virtual ble_error_t setInitiatorPolicyMode(InitiatorPolicyMode_t mode);
 
     /**
      * Get the current advertising policy filter mode.
@@ -1283,7 +1314,7 @@ public:
         "mbed-os-5.11.0",
         "Deprecated since addition of extended advertising support."
     )
-    AdvertisingPolicyMode_t getAdvertisingPolicyMode(void) const;
+    virtual AdvertisingPolicyMode_t getAdvertisingPolicyMode(void) const;
 
     /**
      * Get the current scan policy filter mode.
@@ -1296,7 +1327,7 @@ public:
         "mbed-os-5.11.0",
         "Deprecated since addition of extended advertising support."
     )
-    ScanningPolicyMode_t getScanningPolicyMode(void) const;
+    virtual ScanningPolicyMode_t getScanningPolicyMode(void) const;
 
     /**
      * Get the current initiator policy filter mode.
@@ -1309,11 +1340,9 @@ public:
         "mbed-os-5.11.0",
         "Deprecated since addition of extended advertising support."
     )
-    InitiatorPolicyMode_t getInitiatorPolicyMode(void) const;
-#endif // BLE_FEATURE_WHITELIST
+    virtual InitiatorPolicyMode_t getInitiatorPolicyMode(void) const;
 
 protected:
-#if BLE_ROLE_OBSERVER
     /* Override the following in the underlying adaptation layer to provide the
       functionality of scanning. */
 
@@ -1334,8 +1363,7 @@ protected:
         "Vendors should use the cordio hci interface or the ble::pal or "
         "implement startScan(duplicates_filter_t, scan_duration_t, period)"
     )
-    ble_error_t startRadioScan(const GapScanningParams &scanningParams);
-#endif // BLE_ROLE_OBSERVER
+    virtual ble_error_t startRadioScan(const GapScanningParams &scanningParams);
 
     /*
      * APIs with nonvirtual implementations.
@@ -1357,7 +1385,6 @@ public:
     )
     GapState_t getState(void) const;
 
-#if BLE_ROLE_BROADCASTER
     /**
      * Set the advertising type to use during the advertising procedure.
      *
@@ -1674,8 +1701,7 @@ public:
         "Use setAdvertisingScanResponse() instead."
     )
     void clearScanResponse(void);
-#endif // BLE_ROLE_BROADCASTER
-#if BLE_ROLE_OBSERVER
+
     /**
      * Set the parameters used during a scan procedure.
      *
@@ -1885,7 +1911,6 @@ public:
         T *object,
         void (T::*callbackMember)(const AdvertisementCallbackParams_t *params)
     );
-#endif // BLE_ROLE_OBSERVER
 
     /**
      * Enable radio-notification events.
@@ -1908,10 +1933,9 @@ public:
         "mbed-os-5.11.0",
         "Deprecated since addition of extended advertising support. "
     )
-    ble_error_t initRadioNotification(void);
+    virtual ble_error_t initRadioNotification(void);
 
 private:
-#if BLE_ROLE_BROADCASTER
     /**
      * Set the advertising data and scan response in the vendor subsytem.
      *
@@ -1930,10 +1954,10 @@ private:
         "Deprecated since addition of extended advertising support. "
         "Implement setAdvertisingPayload() and setAdvertisingScanResponse() instead."
     )
-    ble_error_t setAdvertisingData(
+    virtual ble_error_t setAdvertisingData(
         const GapAdvertisingData &advData,
         const GapAdvertisingData &scanResponse
-    );
+    ) = 0;
 
     /**
      * Start the advertising procedure.
@@ -1955,7 +1979,7 @@ private:
         "Implement startAdvertising(advertising_handle_t, adv_duration_t, uint8_t)"
         "instead."
     )
-    ble_error_t startAdvertising(const GapAdvertisingParams &params);
+    virtual ble_error_t startAdvertising(const GapAdvertisingParams &params) = 0;
 
 public:
     /**
@@ -1998,7 +2022,7 @@ public:
         "Use setAdvertisingParameters() instead."
     )
     void setAdvertisingParams(const GapAdvertisingParams &newParams);
-#endif // BLE_ROLE_BROADCASTER
+
     /* Event handlers. */
 public:
 
@@ -2039,7 +2063,7 @@ public:
         "Use setEventHandler() instead."
     )
     TimeoutEventCallbackChain_t &onTimeout();
-#if BLE_FEATURE_CONNECTABLE
+
     /**
      * Register a callback handling connection events.
      *
@@ -2149,7 +2173,7 @@ public:
         "Use setEventHandler() instead."
     )
     DisconnectionEventCallbackChain_t &onDisconnection();
-#endif //BLE_FEATURE_CONNECTABLE
+
     /**
      * Set the radio-notification events handler.
      *
@@ -2213,7 +2237,7 @@ public:
      * @param[in] memberPtr Shutdown event handler to register.
      */
     template<typename T>
-    void onShutdown(T *objPtr, void (T::*memberPtr)(const LegacyGap *))
+    void onShutdown(T *objPtr, void (T::*memberPtr)(const Gap *))
     {
         shutdownCallChain.add(objPtr, memberPtr);
     }
@@ -2248,13 +2272,56 @@ public:
      * @note Currently, a call to reset() does not reset the advertising and
      * scan parameters to default values.
      */
-    ble_error_t reset(void);
+    virtual ble_error_t reset(void)
+    {
+        /* Notify that the instance is about to shut down */
+        shutdownCallChain.call(this);
+        shutdownCallChain.clear();
+
+        /* Clear Gap state */
+        state.advertising = 0;
+        state.connected = 0;
+        connectionCount = 0;
+
+        /* Clear scanning state */
+        scanningActive = false;
+
+        /* Clear advertising and scanning data */
+        _advPayload.clear();
+        _scanResponse.clear();
+
+        /* Clear callbacks */
+        timeoutCallbackChain.clear();
+        connectionCallChain.clear();
+        disconnectionCallChain.clear();
+        radioNotificationCallback = NULL;
+        onAdvertisementReport = NULL;
+        _eventHandler = NULL;
+
+        return BLE_ERROR_NONE;
+    }
 
 protected:
     /**
      * Construct a Gap instance.
      */
-    LegacyGap();
+    Gap() :
+        _advParams(),
+        _advPayload(),
+        _scanningParams(),
+        _scanResponse(),
+        connectionCount(0),
+        state(),
+        scanningActive(false),
+        timeoutCallbackChain(),
+        radioNotificationCallback(),
+        onAdvertisementReport(),
+        connectionCallChain(),
+        disconnectionCallChain()
+    {
+        _advPayload.clear();
+        _scanResponse.clear();
+    }
 
     /* Entry points for the underlying stack to report events back to the user. */
 public:
@@ -2351,7 +2418,17 @@ public:
         "Deprecated since addition of extended advertising support. "
         "Use EventHandler::onDisconnectionComplete() instead"
     )
-    void processDisconnectionEvent(Handle_t handle, DisconnectionReason_t reason);
+    void processDisconnectionEvent(Handle_t handle, DisconnectionReason_t reason)
+    {
+        /* Update Gap state */
+        --connectionCount;
+        if (!connectionCount) {
+            state.connected = 0;
+        }
+
+        DisconnectionCallbackParams_t callbackParams(handle, reason);
+        disconnectionCallChain.call(&callbackParams);
+    }
 
     /**
      * Forward a received advertising packet to all registered event handlers
@@ -2440,7 +2517,16 @@ public:
         "Deprecated since addition of extended advertising support. "
         "Use EventHandler instead"
     )
-    void processTimeoutEvent(TimeoutSource_t source);
+    void processTimeoutEvent(TimeoutSource_t source)
+    {
+        if (source == TIMEOUT_SRC_ADVERTISING) {
+            /* Update gap state if the source is an advertising timeout */
+            state.advertising = 0;
+        }
+        if (timeoutCallbackChain) {
+            timeoutCallbackChain(source);
+        }
+    }
 
 protected:
     /**
@@ -2517,114 +2603,9 @@ private:
 
 private:
     /* Disallow copy and assignment. */
-    LegacyGap(const LegacyGap &);
+    Gap(const Gap &);
 
-    LegacyGap &operator=(const LegacyGap &);
-
-
-protected:
-    using ble::interface::Gap<Impl>::startAdvertising_;
-    using ble::interface::Gap<Impl>::stopAdvertising_;
-    using ble::interface::Gap<Impl>::connect_;
-    using ble::interface::Gap<Impl>::disconnect_;
-
-    /* --- Abstract calls with default implementation --- */
-    uint16_t getMinAdvertisingInterval_(void) const;
-
-    uint16_t getMinNonConnectableAdvertisingInterval_(void) const;
-
-    uint16_t getMaxAdvertisingInterval_(void) const;
-
-    /* Note: Implementation must call the base class reset_ */
-    ble_error_t reset_(void);
-
-    /* --- Abstract calls to override --- */
-
-    uint8_t getMaxWhitelistSize_(void) const;
-
-    ble_error_t getWhitelist_(Whitelist_t &whitelist) const;
-
-    ble_error_t setWhitelist_(const Whitelist_t &whitelist);
-
-    ble_error_t setAddress_(
-        BLEProtocol::AddressType_t type,
-        const BLEProtocol::AddressBytes_t address
-    );
-
-    ble_error_t getAddress_(
-        BLEProtocol::AddressType_t *typeP,
-        BLEProtocol::AddressBytes_t address
-    );
-
-    ble_error_t stopAdvertising_(void);
-
-    ble_error_t connect_(
-        const BLEProtocol::AddressBytes_t peerAddr,
-        PeerAddressType_t peerAddrType,
-        const ConnectionParams_t *connectionParams,
-        const GapScanningParams *scanParams
-    );
-
-    ble_error_t connect_(
-        const BLEProtocol::AddressBytes_t peerAddr,
-        BLEProtocol::AddressType_t peerAddrType,
-        const ConnectionParams_t *connectionParams,
-        const GapScanningParams *scanParams
-    );
-
-    ble_error_t disconnect_(
-        Handle_t connectionHandle, DisconnectionReason_t reason
-    );
-
-    ble_error_t disconnect_(DisconnectionReason_t reason);
-
-    ble_error_t updateConnectionParams_(
-        Handle_t handle,
-        const ConnectionParams_t *params
-    );
-
-    ble_error_t setTxPower_(int8_t txPower);
-
-    void getPermittedTxPowerValues_(
-        const int8_t **valueArrayPP, size_t *countP
-    );
-
-    ble_error_t setAdvertisingPolicyMode_(AdvertisingPolicyMode_t mode);
-
-    ble_error_t setScanningPolicyMode_(ScanningPolicyMode_t mode);
-
-    ble_error_t setInitiatorPolicyMode_(InitiatorPolicyMode_t mode);
-
-    AdvertisingPolicyMode_t getAdvertisingPolicyMode_(void) const;
-
-    ScanningPolicyMode_t getScanningPolicyMode_(void) const;
-
-    InitiatorPolicyMode_t getInitiatorPolicyMode_(void) const;
-
-    ble_error_t startRadioScan_(const GapScanningParams &scanningParams);
-
-    ble_error_t initRadioNotification_(void);
-
-    ble_error_t getPreferredConnectionParams_(ConnectionParams_t *params);
-
-    ble_error_t setPreferredConnectionParams_(
-        const ConnectionParams_t *params
-    );
-
-    ble_error_t setDeviceName_(const uint8_t *deviceName);
-
-    ble_error_t getDeviceName_(uint8_t *deviceName, unsigned *lengthP);
-
-    ble_error_t setAppearance_(GapAdvertisingData::Appearance appearance);
-
-    ble_error_t getAppearance_(GapAdvertisingData::Appearance *appearanceP);
-
-    ble_error_t setAdvertisingData_(
-        const GapAdvertisingData &advData,
-        const GapAdvertisingData &scanResponse
-    );
-
-    ble_error_t startAdvertising_(const GapAdvertisingParams &params);
+    Gap &operator=(const Gap &);
 };
 
 /**
@@ -2642,10 +2623,8 @@ protected:
 #pragma diag_suppress 1361
 #endif
 
-#if BLE_ROLE_OBSERVER
-template<class Impl>
 template<typename T>
-ble_error_t LegacyGap<Impl>::startScan(
+ble_error_t Gap::startScan(
     T *object,
     void (T::*callbackMember)(const AdvertisementCallbackParams_t *params)
 )
@@ -2660,27 +2639,22 @@ ble_error_t LegacyGap<Impl>::startScan(
 
     return err;
 }
-#endif // BLE_ROLE_OBSERVER
 
-#if BLE_FEATURE_CONNECTABLE
-template<class Impl>
+
 template<typename T>
-void LegacyGap<Impl>::onConnection(T *tptr, void (T::*mptr)(const ConnectionCallbackParams_t *))
+void Gap::onConnection(T *tptr, void (T::*mptr)(const ConnectionCallbackParams_t *))
 {
     connectionCallChain.add(tptr, mptr);
 }
 
-template<class Impl>
 template<typename T>
-void LegacyGap<Impl>::onDisconnection(T *tptr, void (T::*mptr)(const DisconnectionCallbackParams_t *))
+void Gap::onDisconnection(T *tptr, void (T::*mptr)(const DisconnectionCallbackParams_t *))
 {
     disconnectionCallChain.add(tptr, mptr);
 }
-#endif //BLE_FEATURE_CONNECTABLE
 
-template<class Impl>
 template<typename T>
-void LegacyGap<Impl>::onRadioNotification(T *tptr, void (T::*mptr)(bool))
+void Gap::onRadioNotification(T *tptr, void (T::*mptr)(bool))
 {
     radioNotificationCallback.attach(tptr, mptr);
 }
@@ -2690,17 +2664,5 @@ void LegacyGap<Impl>::onRadioNotification(T *tptr, void (T::*mptr)(bool))
 #elif defined(__CC_ARM)
 #pragma pop
 #endif
-
-} // interface
-} // ble
-
-// import LegacyGap implementation into global namespace
-typedef ble::impl::LegacyGap Gap;
-
-// import Gap implementation into ble namespace
-namespace ble {
-typedef impl::Gap Gap;
-}
-
 
 #endif // ifndef MBED_BLE_GAP_H__

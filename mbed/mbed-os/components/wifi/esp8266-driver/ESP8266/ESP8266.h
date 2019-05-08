@@ -27,7 +27,6 @@
 #include "platform/ATCmdParser.h"
 #include "platform/Callback.h"
 #include "platform/mbed_error.h"
-#include "rtos/ConditionVariable.h"
 #include "rtos/Mutex.h"
 
 // Various timeouts for different ESP8266 operations
@@ -397,7 +396,6 @@ private:
     PinName _serial_rts;
     PinName _serial_cts;
     rtos::Mutex _smutex; // Protect serial port access
-    rtos::Mutex _rmutex; // Reset protection
 
     // AT Command Parser
     mbed::ATCmdParser _parser;
@@ -437,7 +435,6 @@ private:
     void _oob_watchdog_reset();
     void _oob_busy();
     void _oob_tcp_data_hdlr();
-    void _oob_ready();
 
     // OOB state variables
     int _connect_error;
@@ -447,8 +444,6 @@ private:
     bool _closed;
     bool _error;
     bool _busy;
-    rtos::ConditionVariable _reset_check;
-    bool _reset_done;
 
     // Modem's address info
     char _ip_buffer[16];

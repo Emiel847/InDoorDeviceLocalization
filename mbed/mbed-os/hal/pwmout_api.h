@@ -21,7 +21,6 @@
 #define MBED_PWMOUT_API_H
 
 #include "device.h"
-#include "pinmap.h"
 
 #if DEVICE_PWMOUT
 
@@ -108,15 +107,6 @@ void pwmout_pulsewidth_ms(pwmout_t *obj, int ms);
  * @param us  The floating-point pulsewidth in microseconds
  */
 void pwmout_pulsewidth_us(pwmout_t *obj, int us);
-
-/** Get the pins that support PWM
- *
- * Return a PinMap array of pins that support PWM.
- * The array is terminated with {NC, NC, 0}.
- *
- * @return PinMap array
- */
-const PinMap *pwmout_pinmap(void);
 
 /**@}*/
 

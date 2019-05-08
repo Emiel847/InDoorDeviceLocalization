@@ -28,6 +28,8 @@ class Thread;
 
 namespace mbed {
 
+class CellularPower;
+class CellularSIM;
 class CellularDevice;
 
 const int RETRY_ARRAY_SIZE = 10;
@@ -41,7 +43,6 @@ private:
     // friend of CellularDevice so that it's the only way to close/delete this class.
     friend class CellularDevice;
     friend class AT_CellularDevice;
-    friend class UT_CellularStateMachine; // for unit tests
     /** Constructor
      *
      * @param device    reference to CellularDevice
@@ -98,7 +99,7 @@ private:
      *  @param timeout      timeout array using seconds
      *  @param array_len    length of the array
      */
-    void set_retry_timeout_array(const uint16_t timeout[], int array_len);
+    void set_retry_timeout_array(uint16_t timeout[], int array_len);
 
     /** Sets the operator plmn which is used when registering to a network specified by plmn. If plmn is not set then automatic
      *  registering is used when registering to a cellular network. Does not start any operations.
@@ -154,9 +155,8 @@ private:
     bool is_registered_to_plmn();
     void report_failure(const char *msg);
     void event();
-    void device_ready_cb();
+    void ready_urc_cb();
     void pre_event(CellularState state);
-    bool check_is_target_reached();
 
     CellularDevice &_cellularDevice;
     CellularState _state;
@@ -166,6 +166,8 @@ private:
     Callback<void(nsapi_event_t, intptr_t)> _event_status_cb;
 
     CellularNetwork *_network;
+    CellularPower *_power;
+    CellularSIM *_sim;
     events::EventQueue &_queue;
     rtos::Thread *_queue_thread;
 
@@ -183,7 +185,7 @@ private:
     bool _is_retry;
     cell_callback_data_t _cb_data;
     nsapi_event_t _current_event;
-    int _status;
+    int _network_status; // Is there any active context or is modem attached to a network?
     PlatformMutex _mutex;
 };
 

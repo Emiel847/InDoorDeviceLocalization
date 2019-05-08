@@ -18,7 +18,6 @@
 
 #include "EMACMemoryManager.h"
 
-
 class LWIPMemoryManager : public EMACMemoryManager {
 public:
 
@@ -31,7 +30,7 @@ public:
      * @param align    Memory alignment requirement in bytes
      * @return         Allocated memory buffer, or NULL in case of error
      */
-    virtual net_stack_mem_buf_t *alloc_heap(uint32_t size, uint32_t align);
+    virtual emac_mem_buf_t *alloc_heap(uint32_t size, uint32_t align);
 
     /**
      * Allocates memory buffer chain from a pool
@@ -44,7 +43,7 @@ public:
      * @param  align   Memory alignment requirement for each buffer in bytes
      * @return         Allocated memory buffer chain, or NULL in case of error
      */
-    virtual net_stack_mem_buf_t *alloc_pool(uint32_t size, uint32_t align);
+    virtual emac_mem_buf_t *alloc_pool(uint32_t size, uint32_t align);
 
     /**
      * Get memory buffer pool allocation unit
@@ -64,7 +63,7 @@ public:
      *
      * @param buf      Memory buffer chain to be freed.
      */
-    virtual void free(net_stack_mem_buf_t *buf);
+    virtual void free(emac_mem_buf_t *buf);
 
     /**
      * Return total length of a memory buffer chain
@@ -74,7 +73,7 @@ public:
      * @param buf      Memory buffer chain
      * @return         Total length in bytes
      */
-    virtual uint32_t get_total_len(const net_stack_mem_buf_t *buf) const;
+    virtual uint32_t get_total_len(const emac_mem_buf_t *buf) const;
 
     /**
      * Copy a memory buffer chain
@@ -85,7 +84,7 @@ public:
      * @param to_buf    Memory buffer chain to copy to
      * @param from_buf  Memory buffer chain to copy from
      */
-    virtual void copy(net_stack_mem_buf_t *to_buf, const net_stack_mem_buf_t *from_buf);
+    virtual void copy(emac_mem_buf_t *to_buf, const emac_mem_buf_t *from_buf);
 
     /**
      * Copy to a memory buffer chain
@@ -98,7 +97,7 @@ public:
      * @param ptr       Pointer to data
      * @param len       Data length
      */
-    virtual void copy_to_buf(net_stack_mem_buf_t *to_buf, const void *ptr, uint32_t len);
+    virtual void copy_to_buf(emac_mem_buf_t *to_buf, const void *ptr, uint32_t len);
 
     /**
      * Copy from a memory buffer chain
@@ -110,7 +109,7 @@ public:
      * @param from_buf  Memory buffer chain to copy from
      * @return          Length of the data that was copied
      */
-    virtual uint32_t copy_from_buf(void *ptr, uint32_t len, const net_stack_mem_buf_t *from_buf) const;
+    virtual uint32_t copy_from_buf(void *ptr, uint32_t len, const emac_mem_buf_t *from_buf) const;
 
     /**
      * Concatenate two memory buffer chains
@@ -122,7 +121,7 @@ public:
      * @param to_buf   Memory buffer chain to concatenate to
      * @param cat_buf  Memory buffer chain to concatenate
      */
-    virtual void cat(net_stack_mem_buf_t *to_buf, net_stack_mem_buf_t *cat_buf);
+    virtual void cat(emac_mem_buf_t *to_buf, emac_mem_buf_t *cat_buf);
 
     /**
      * Returns the next buffer
@@ -132,7 +131,7 @@ public:
      * @param buf      Memory buffer
      * @return         The next memory buffer, or NULL if last
      */
-    virtual net_stack_mem_buf_t *get_next(const net_stack_mem_buf_t *buf) const;
+    virtual emac_mem_buf_t *get_next(const emac_mem_buf_t *buf) const;
 
     /**
      * Return pointer to the payload of the buffer
@@ -140,7 +139,7 @@ public:
      * @param buf      Memory buffer
      * @return         Pointer to the payload
      */
-    virtual void *get_ptr(const net_stack_mem_buf_t *buf) const;
+    virtual void *get_ptr(const emac_mem_buf_t *buf) const;
 
     /**
      * Return payload size of the buffer
@@ -148,7 +147,7 @@ public:
      * @param buf      Memory buffer
      * @return         Size in bytes
      */
-    virtual uint32_t get_len(const net_stack_mem_buf_t *buf) const;
+    virtual uint32_t get_len(const emac_mem_buf_t *buf) const;
 
     /**
      * Sets the payload size of the buffer
@@ -159,7 +158,7 @@ public:
      * @param buf      Memory buffer
      * @param len      Payload size, must be less or equal allocated size
      */
-    virtual void set_len(net_stack_mem_buf_t *buf, uint32_t len);
+    virtual void set_len(emac_mem_buf_t *buf, uint32_t len);
 
 private:
 

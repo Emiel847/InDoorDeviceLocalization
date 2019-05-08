@@ -71,8 +71,7 @@ static const char *const rat_str[AT_CellularNetwork::RAT_MAX] = {
 
 
 AT_CellularNetwork::AT_CellularNetwork(ATHandler &atHandler) : AT_CellularBase(atHandler),
-    _connection_status_cb(NULL), _ciotopt_network_support_cb(NULL), _op_act(RAT_UNKNOWN),
-    _connect_status(NSAPI_STATUS_DISCONNECTED), _supported_network_opt(CIOT_OPT_MAX)
+    _connection_status_cb(NULL), _op_act(RAT_UNKNOWN), _connect_status(NSAPI_STATUS_DISCONNECTED)
 {
 
     _urc_funcs[C_EREG] = callback(this, &AT_CellularNetwork::urc_cereg);
@@ -80,7 +79,7 @@ AT_CellularNetwork::AT_CellularNetwork(ATHandler &atHandler) : AT_CellularBase(a
     _urc_funcs[C_REG] = callback(this, &AT_CellularNetwork::urc_creg);
 
     for (int type = 0; type < CellularNetwork::C_MAX; type++) {
-        if (get_property((AT_CellularBase::CellularProperty)type) != RegistrationModeDisable) {
+        if (has_registration((RegistrationType)type) != RegistrationModeDisable) {
             _at.set_urc_handler(at_reg[type].urc_prefix, _urc_funcs[type]);
         }
     }
@@ -88,7 +87,6 @@ AT_CellularNetwork::AT_CellularNetwork(ATHandler &atHandler) : AT_CellularBase(a
     _at.set_urc_handler("NO CARRIER", callback(this, &AT_CellularNetwork::urc_no_carrier));
     // additional urc to get better disconnect info for application. Not critical.
     _at.set_urc_handler("+CGEV:", callback(this, &AT_CellularNetwork::urc_cgev));
-    _at.set_urc_handler("+CCIOTOPTI:", callback(this, &AT_CellularNetwork::urc_cciotopti));
     _at.lock();
     _at.cmd_start("AT+CGEREP=1");// discard unsolicited result codes when MT TE link is reserved (e.g. in on line data mode); otherwise forward them directly to the TE
     _at.cmd_stop_read_resp();
@@ -103,13 +101,13 @@ AT_CellularNetwork::~AT_CellularNetwork()
     _at.unlock();
 
     for (int type = 0; type < CellularNetwork::C_MAX; type++) {
-        if (get_property((AT_CellularBase::CellularProperty)type) != RegistrationModeDisable) {
-            _at.set_urc_handler(at_reg[type].urc_prefix, 0);
+        if (has_registration((RegistrationType)type) != RegistrationModeDisable) {
+            _at.remove_urc_handler(at_reg[type].urc_prefix);
         }
     }
 
-    _at.set_urc_handler("NO CARRIER", 0);
-    _at.set_urc_handler("+CGEV:", 0);
+    _at.remove_urc_handler("NO CARRIER");
+    _at.remove_urc_handler("+CGEV:");
 }
 
 void AT_CellularNetwork::urc_no_carrier()
@@ -171,7 +169,7 @@ void AT_CellularNetwork::read_reg_params_and_compare(RegistrationType type)
                     reg_params._status == RegisteredRoaming)) {
                 if (previous_registration_status == RegisteredHomeNetwork ||
                         previous_registration_status == RegisteredRoaming) {
-                    call_network_cb(NSAPI_STATUS_DISCONNECTED);
+                    _connection_status_cb(NSAPI_EVENT_CONNECTION_STATUS_CHANGE, NSAPI_STATUS_DISCONNECTED);
                 }
             }
         }
@@ -200,8 +198,11 @@ void AT_CellularNetwork::urc_cgreg()
 
 void AT_CellularNetwork::call_network_cb(nsapi_connection_status_t status)
 {
-    if (_connection_status_cb) {
-        _connection_status_cb(NSAPI_EVENT_CONNECTION_STATUS_CHANGE, _connect_status);
+    if (_connect_status != status) {
+        _connect_status = status;
+        if (_connection_status_cb) {
+            _connection_status_cb(NSAPI_EVENT_CONNECTION_STATUS_CHANGE, _connect_status);
+        }
     }
 }
 
@@ -210,12 +211,17 @@ void AT_CellularNetwork::attach(Callback<void(nsapi_event_t, intptr_t)> status_c
     _connection_status_cb = status_cb;
 }
 
+nsapi_connection_status_t AT_CellularNetwork::get_connection_status() const
+{
+    return _connect_status;
+}
+
 nsapi_error_t AT_CellularNetwork::set_registration_urc(RegistrationType type, bool urc_on)
 {
     int index = (int)type;
     MBED_ASSERT(index >= 0 && index < C_MAX);
 
-    RegistrationMode mode = (RegistrationMode)get_property((AT_CellularBase::CellularProperty)type);
+    RegistrationMode mode = has_registration(type);
     if (mode == RegistrationModeDisable) {
         return NSAPI_ERROR_UNSUPPORTED;
     } else {
@@ -314,6 +320,12 @@ void AT_CellularNetwork::read_reg_params(RegistrationType type, registration_par
 #endif
 }
 
+AT_CellularNetwork::RegistrationMode AT_CellularNetwork::has_registration(RegistrationType reg_type)
+{
+    (void)reg_type;
+    return RegistrationModeLAC;
+}
+
 nsapi_error_t AT_CellularNetwork::set_attach()
 {
     _at.lock();
@@ -367,7 +379,6 @@ nsapi_error_t AT_CellularNetwork::detach()
 
 nsapi_error_t AT_CellularNetwork::set_access_technology_impl(RadioAccessTechnology opsAct)
 {
-    _op_act = RAT_UNKNOWN;
     return NSAPI_ERROR_UNSUPPORTED;
 }
 
@@ -422,15 +433,14 @@ nsapi_error_t AT_CellularNetwork::scan_plmn(operList_t &operators, int &opsCount
     return _at.unlock_return_error();
 }
 
-nsapi_error_t AT_CellularNetwork::set_ciot_optimization_config(CIoT_Supported_Opt supported_opt,
-                                                               CIoT_Preferred_UE_Opt preferred_opt,
-                                                               Callback<void(CIoT_Supported_Opt)> network_support_cb)
+nsapi_error_t AT_CellularNetwork::set_ciot_optimization_config(Supported_UE_Opt supported_opt,
+                                                               Preferred_UE_Opt preferred_opt)
 {
-    _ciotopt_network_support_cb = network_support_cb;
+
     _at.lock();
 
     _at.cmd_start("AT+CCIOTOPT=");
-    _at.write_int(1); //enable CCIOTOPTI URC
+    _at.write_int(0); // disable urc
     _at.write_int(supported_opt);
     _at.write_int(preferred_opt);
     _at.cmd_stop_read_resp();
@@ -438,17 +448,8 @@ nsapi_error_t AT_CellularNetwork::set_ciot_optimization_config(CIoT_Supported_Op
     return _at.unlock_return_error();
 }
 
-void AT_CellularNetwork::urc_cciotopti()
-{
-    _supported_network_opt = (CIoT_Supported_Opt)_at.read_int();
-
-    if (_ciotopt_network_support_cb) {
-        _ciotopt_network_support_cb(_supported_network_opt);
-    }
-}
-
-nsapi_error_t AT_CellularNetwork::get_ciot_ue_optimization_config(CIoT_Supported_Opt &supported_opt,
-                                                                  CIoT_Preferred_UE_Opt &preferred_opt)
+nsapi_error_t AT_CellularNetwork::get_ciot_optimization_config(Supported_UE_Opt &supported_opt,
+                                                               Preferred_UE_Opt &preferred_opt)
 {
     _at.lock();
 
@@ -458,8 +459,8 @@ nsapi_error_t AT_CellularNetwork::get_ciot_ue_optimization_config(CIoT_Supported
     _at.resp_start("+CCIOTOPT:");
     _at.read_int();
     if (_at.get_last_error() == NSAPI_ERROR_OK) {
-        supported_opt = (CIoT_Supported_Opt)_at.read_int();
-        preferred_opt = (CIoT_Preferred_UE_Opt)_at.read_int();
+        supported_opt = (Supported_UE_Opt)_at.read_int();
+        preferred_opt = (Preferred_UE_Opt)_at.read_int();
     }
 
     _at.resp_stop();
@@ -467,13 +468,30 @@ nsapi_error_t AT_CellularNetwork::get_ciot_ue_optimization_config(CIoT_Supported
     return _at.unlock_return_error();
 }
 
-nsapi_error_t AT_CellularNetwork::get_ciot_network_optimization_config(CIoT_Supported_Opt &supported_network_opt)
+nsapi_error_t AT_CellularNetwork::get_extended_signal_quality(int &rxlev, int &ber, int &rscp, int &ecno, int &rsrq, int &rsrp)
 {
-    supported_network_opt = _supported_network_opt;
-    return NSAPI_ERROR_OK;
+    _at.lock();
+
+    _at.cmd_start("AT+CESQ");
+    _at.cmd_stop();
+
+    _at.resp_start("+CESQ:");
+    rxlev = _at.read_int();
+    ber = _at.read_int();
+    rscp = _at.read_int();
+    ecno = _at.read_int();
+    rsrq = _at.read_int();
+    rsrp = _at.read_int();
+    _at.resp_stop();
+    if (rxlev < 0 || ber < 0 || rscp < 0 || ecno < 0 || rsrq < 0 || rsrp < 0) {
+        _at.unlock();
+        return NSAPI_ERROR_DEVICE_ERROR;
+    }
+
+    return _at.unlock_return_error();
 }
 
-nsapi_error_t AT_CellularNetwork::get_signal_quality(int &rssi, int *ber)
+nsapi_error_t AT_CellularNetwork::get_signal_quality(int &rssi, int &ber)
 {
     _at.lock();
 
@@ -481,27 +499,18 @@ nsapi_error_t AT_CellularNetwork::get_signal_quality(int &rssi, int *ber)
     _at.cmd_stop();
 
     _at.resp_start("+CSQ:");
-    int t_rssi = _at.read_int();
-    int t_ber = _at.read_int();
+    rssi = _at.read_int();
+    ber = _at.read_int();
     _at.resp_stop();
-    if (t_rssi < 0 || t_ber < 0) {
+    if (rssi < 0 || ber < 0) {
         _at.unlock();
         return NSAPI_ERROR_DEVICE_ERROR;
     }
 
-    // RSSI value is returned in dBm with range from -51 to -113 dBm, see 3GPP TS 27.007
-    if (t_rssi == 99) {
-        rssi = SignalQualityUnknown;
+    if (rssi == 99) {
+        rssi = 0;
     } else {
-        rssi = -113 + 2 * t_rssi;
-    }
-
-    if (ber) {
-        if (t_ber == 99) {
-            *ber = SignalQualityUnknown;
-        } else {
-            *ber = t_ber;
-        }
+        rssi = -113 + 2 * rssi;
     }
 
     return _at.unlock_return_error();
@@ -599,7 +608,7 @@ nsapi_error_t AT_CellularNetwork::get_registration_params(RegistrationType type,
     int i = (int)type;
     MBED_ASSERT(i >= 0 && i < C_MAX);
 
-    if (!get_property((AT_CellularBase::CellularProperty)at_reg[i].type)) {
+    if (!has_registration(at_reg[i].type)) {
         return NSAPI_ERROR_UNSUPPORTED;
     }
 
@@ -670,21 +679,4 @@ int AT_CellularNetwork::calculate_periodic_tau(const char *periodic_tau_string, 
         default: // timer is deactivated
             return 0;
     }
-}
-
-nsapi_error_t AT_CellularNetwork::set_receive_period(int mode, EDRXAccessTechnology act_type, uint8_t edrx_value)
-{
-    char edrx[5];
-    uint_to_binary_str(edrx_value, edrx, 5, 4);
-    edrx[4] = '\0';
-
-    _at.lock();
-
-    _at.cmd_start("AT+CEDRXS=");
-    _at.write_int(mode);
-    _at.write_int(act_type);
-    _at.write_string(edrx);
-    _at.cmd_stop_read_resp();
-
-    return _at.unlock_return_error();
 }

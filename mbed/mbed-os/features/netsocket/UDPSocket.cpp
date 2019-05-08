@@ -43,14 +43,7 @@ nsapi_error_t UDPSocket::connect(const SocketAddress &address)
 nsapi_size_or_error_t UDPSocket::sendto(const char *host, uint16_t port, const void *data, nsapi_size_t size)
 {
     SocketAddress address;
-    nsapi_size_or_error_t err;
-
-    if (!strcmp(_interface_name, "")) {
-        err = _stack->gethostbyname(host, &address);
-    } else {
-        err = _stack->gethostbyname(host, &address, NSAPI_UNSPEC, _interface_name);
-    }
-
+    nsapi_size_or_error_t err = _stack->gethostbyname(host, &address);
     if (err) {
         return NSAPI_ERROR_DNS_FAILURE;
     }
@@ -77,7 +70,7 @@ nsapi_size_or_error_t UDPSocket::sendto(const SocketAddress &address, const void
             break;
         }
 
-        core_util_atomic_flag_clear(&_pending);
+        _pending = 0;
         nsapi_size_or_error_t sent = _stack->socket_sendto(_socket, address, data, size);
         if ((0 == _timeout) || (NSAPI_ERROR_WOULD_BLOCK != sent)) {
             _socket_stats.stats_update_sent_bytes(this, sent);
@@ -137,7 +130,7 @@ nsapi_size_or_error_t UDPSocket::recvfrom(SocketAddress *address, void *buffer, 
             break;
         }
 
-        core_util_atomic_flag_clear(&_pending);
+        _pending = 0;
         nsapi_size_or_error_t recv = _stack->socket_recvfrom(_socket, address, buffer, size);
 
         // Filter incomming packets using connected peer address

@@ -62,7 +62,7 @@ nsapi_error_t TCPSocket::connect(const SocketAddress &address)
             break;
         }
 
-        core_util_atomic_flag_clear(&_pending);
+        _pending = 0;
         ret = _stack->socket_connect(_socket, address);
         if ((_timeout == 0) || !(ret == NSAPI_ERROR_IN_PROGRESS || ret == NSAPI_ERROR_ALREADY)) {
             _socket_stats.stats_update_socket_state(this, SOCK_CONNECTED);
@@ -110,12 +110,7 @@ nsapi_error_t TCPSocket::connect(const char *host, uint16_t port)
     if (!_socket) {
         return NSAPI_ERROR_NO_SOCKET;
     }
-    nsapi_error_t err;
-    if (!strcmp(_interface_name, "")) {
-        err = _stack->gethostbyname(host, &address);
-    } else {
-        err = _stack->gethostbyname(host, &address, NSAPI_UNSPEC, _interface_name);
-    }
+    nsapi_error_t err = _stack->gethostbyname(host, &address);
     if (err) {
         return NSAPI_ERROR_DNS_FAILURE;
     }
@@ -148,7 +143,7 @@ nsapi_size_or_error_t TCPSocket::send(const void *data, nsapi_size_t size)
             break;
         }
 
-        core_util_atomic_flag_clear(&_pending);
+        _pending = 0;
         ret = _stack->socket_send(_socket, data_ptr + written, size - written);
         if (ret >= 0) {
             written += ret;
@@ -215,7 +210,7 @@ nsapi_size_or_error_t TCPSocket::recv(void *data, nsapi_size_t size)
             break;
         }
 
-        core_util_atomic_flag_clear(&_pending);
+        _pending = 0;
         ret = _stack->socket_recv(_socket, data, size);
         if ((_timeout == 0) || (ret != NSAPI_ERROR_WOULD_BLOCK)) {
             _socket_stats.stats_update_recv_bytes(this, ret);
@@ -286,7 +281,7 @@ TCPSocket *TCPSocket::accept(nsapi_error_t *error)
             break;
         }
 
-        core_util_atomic_flag_clear(&_pending);
+        _pending = 0;
         void *socket;
         SocketAddress address;
         ret = _stack->socket_accept(_socket, &socket, &address);

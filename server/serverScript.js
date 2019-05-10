@@ -15,6 +15,7 @@ var client = new ttn.DataClient(appId, accessKey, 'eu.thethings.network:1883');
 
 var output = {utcTime:"", verdiep:0, accesPoint:0, devId:""};
 client.on("uplink", function (devId, payload) {
+	
     console.log("*** Received uplink from*** ", devId)
 	console.log(payload)
 	console.log()

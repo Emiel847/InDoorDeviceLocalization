@@ -15,21 +15,13 @@ var client = new ttn.DataClient(appId, accessKey, 'eu.thethings.network:1883');
 
 var output = {utcTime:"", verdiep:0, accesPoint:0, devId:""};
 client.on("uplink", function (devId, payload) {
-	
-    console.log("*** Received uplink from*** ", devId)
-	console.log(payload)
-	console.log()
-	
+    console.log("*** Received uplink from", devId , "***")
+
 	output.utcTime = payload.metadata.time;
 	output.verdiep = payload.payload_fields.verdiep;
 	output.accesPoint = payload.payload_fields.accesPoint;
 	output.devId = devId;
-	
-	console.log("utcTime ", output.utcTime);
-	console.log("verdiep ", output.verdiep);
-	console.log("accesPoint ", output.accesPoint);
-	console.log("devId ", output.devId);
-    console.log()
+	console.log("Time:", output.utcTime);
 });
 
 app.use(express.static(__dirname));
@@ -49,3 +41,5 @@ http.createServer(function (req, res) {
     res.writeHead(200, {'Content-Type': 'application/json'});
     res.end(JSON.stringify(output));
   }).listen(8080);
+
+console.log("*** >>> Server up and running <<< ***");

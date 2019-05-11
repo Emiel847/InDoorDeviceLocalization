@@ -2,105 +2,14 @@
 <html>
 <head>
 	<title>Kaart KULeuven</title>
-	<style type="text/css">
-		@keyframes example {
-			0% { transform: scale(1); 
-					color: lightblue;}
-			30% { transform: scale(1); }
-			40% { transform: scale(1.08); }
-			50% { transform: scale(1); 
-					color: #a3c9b3;}
-			60% { transform: scale(1); }
-			70% { transform: scale(1.05); }
-			80% { transform: scale(1); }
-			100% { transform: scale(1); }
-		}
-		body{
-			background-color: #201377;
-			color: #269fa5;
-		}
-		
-		h1,h2{
-			font-family: Arial, Helvetica, sans-serif;
-			text-align: center;
-			
-		}
-		
-		.point{
-			position: absolute;
-			visibility : hidden;
-			border-radius: 25px;
-			height: 25px;
-			width: 25px;
-			color: lightblue;
-			animation-name: example;
-		 	animation-duration: 1s;
-		   	animation-iteration-count: infinite;
-		   	text-shadow: 0 0 10px blue;
-		}
-		.point > div{		
-			font-size: 10px;
-			text-align: center;
-			text-shadow: none;
-			
-			width: 160px;
-			background-color: #555;
-			color: #fff;
-			border-radius: 6px;
-			padding: 8px 0;
-			position: absolute;
-			z-index: 1;
-			bottom: -260%;
-			left: 53%;
-			margin-left: -63px;
-		}
-		
-		.point > div::after {
-			  content: "";
-			  position: absolute;
-			  top: -10px;
-			  left: 50%;
-			  margin-left: -5px;
-			  border-width: 5px;
-			  border-style: solid;
-			  border-color: transparent transparent #555 transparent;
-		}
-		
-		.verdiep{
-			visibility: hidden;
-			position: absolute;
-		}
-		
-		html{
-			cursor: url(res/toverstaf.png), auto;
-		}
-		
-		footer > img{
-			float: right;
-			position: absolute;
-			right: 0;
-			height: inherit;
-			padding-left: 5px;
-		}
-		footer{
-			align: right;
-			position:absolute;
-			bottom:0;
-			height:60px;
-			width: 90%;
-		}
-		footer > p{
-			font-size: 15px;
-			font-family: Arial, Helvetica, sans-serif;
-		}
-		
-	</style>
+  <link rel="stylesheet" href="style.css"/>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
 	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
 	<script type="text/javascript">
 		
-		var myIp = (location.host).slice(0,-5);
+		//var myIp = location.host; //for PI -> proxy on port 80 ^^
+		var myIp = (location.host).slice(0,-5); //for LOCAL PC
 		function get()
 		{
 			$.ajax({
@@ -135,81 +44,94 @@
 	<h1>Kaart voor tovenaars </h1>
 	<h2 class="kaartNummer"></h2>
 		<div class="content">
-			<div class="verdiep0 verdiep">
-				<img src="res/v0.jpg" alt="kaart verdiep 0">
-				<i class="point 0 fas fa-wifi fa-3x" style="left: 75%; top: 17%"><div></div></i>
-				<i class="point 1 fas fa-wifi fa-3x" style="left: 41%; top: 15%"><div></div></i>
-				<i class="point 2 fas fa-wifi fa-3x" style="left: 35%; top: 54%"><div></div></i>
-				<i class="point 3 fas fa-wifi fa-3x" style="left:  8%; top: 17%"><div></div></i>
-				<i class="point 4 fas fa-wifi fa-3x" style="left: 56%; top: 86%"><div></div></i>
-				<i class="point 5 fas fa-wifi fa-3x" style="left: 76%; top: 56%"><div></div></i>
-				<i class="point 6 fas fa-wifi fa-3x" style="left: 76%; top: 78%"><div></div></i>
+			<div class="verdiep_wrapper">
+				<div class="verdiep0 verdiep">
+					<img class="floor_img" src="res/v0.jpg" alt="kaart verdiep 0">
+					<i class="point 0 fas fa-wifi fa-3x" style="left: 75%; top: 17%"><div></div></i>
+					<i class="point 1 fas fa-wifi fa-3x" style="left: 41%; top: 15%"><div></div></i>
+					<i class="point 2 fas fa-wifi fa-3x" style="left: 35%; top: 54%"><div></div></i>
+					<i class="point 3 fas fa-wifi fa-3x" style="left:  8%; top: 17%"><div></div></i>
+					<i class="point 4 fas fa-wifi fa-3x" style="left: 56%; top: 86%"><div></div></i>
+					<i class="point 5 fas fa-wifi fa-3x" style="left: 76%; top: 56%"><div></div></i>
+					<i class="point 6 fas fa-wifi fa-3x" style="left: 76%; top: 78%"><div></div></i>
+				</div>
 			</div>
-			<div class="verdiep1 verdiep">
-				<img src="res/v1.jpg" alt="kaart verdiep 1">
-				<i class="point 0 fas fa-wifi fa-3x" style="left: 87%; top: 69%"><div></div></i>
-				<i class="point 1 fas fa-wifi fa-3x" style="left: 90%; top: 10%"><div></div></i>
-				<i class="point 2 fas fa-wifi fa-3x" style="left: 55%; top: 14%"><div></div></i>
-				<i class="point 3 fas fa-wifi fa-3x" style="left: 36%; top: 57%"><div></div></i>
-				<i class="point 4 fas fa-wifi fa-3x" style="left: 18%; top: 52%"><div></div></i>
-				<i class="point 5 fas fa-wifi fa-3x" style="left: 23%; top: 17%"><div></div></i>
-				<i class="point 6 fas fa-wifi fa-3x" style="left: 55%; top: 82%"><div></div></i>
+			<div class="verdiep_wrapper">
+				<div class="verdiep1 verdiep">
+					<img class="floor_img" src="res/v1.jpg" alt="kaart verdiep 1">
+					<i class="point 0 fas fa-wifi fa-3x" style="left: 87%; top: 69%"><div></div></i>
+					<i class="point 1 fas fa-wifi fa-3x" style="left: 90%; top: 10%"><div></div></i>
+					<i class="point 2 fas fa-wifi fa-3x" style="left: 55%; top: 14%"><div></div></i>
+					<i class="point 3 fas fa-wifi fa-3x" style="left: 36%; top: 57%"><div></div></i>
+					<i class="point 4 fas fa-wifi fa-3x" style="left: 18%; top: 52%"><div></div></i>
+					<i class="point 5 fas fa-wifi fa-3x" style="left: 23%; top: 17%"><div></div></i>
+					<i class="point 6 fas fa-wifi fa-3x" style="left: 55%; top: 82%"><div></div></i>
+				</div>
 			</div>
-			<div class="verdiep2 verdiep">
-				<img src="res/v2.jpg" alt="kaart verdiep 2">
-				<i class="point 0 fas fa-wifi fa-3x" style="left: 87%; top: 78%"><div></div></i>
-				<i class="point 1 fas fa-wifi fa-3x" style="left: 46%; top: 18%"><div></div></i>
-				<i class="point 2 fas fa-wifi fa-3x" style="left: 45%; top: 70%"><div></div></i>
-				<i class="point 3 fas fa-wifi fa-3x" style="left: 24%; top: 70%"><div></div></i>
-				<i class="point 4 fas fa-wifi fa-3x" style="left:  9%; top: 70%"><div></div></i>
-				<i class="point 5 fas fa-wifi fa-3x" style="left: 13%; top: 18%"><div></div></i>
+			<div class="verdiep_wrapper">
+				<div class="verdiep2 verdiep">
+					<img class="floor_img" src="res/v2.jpg" alt="kaart verdiep 2">
+					<i class="point 0 fas fa-wifi fa-3x" style="left: 87%; top: 78%"><div></div></i>
+					<i class="point 1 fas fa-wifi fa-3x" style="left: 46%; top: 18%"><div></div></i>
+					<i class="point 2 fas fa-wifi fa-3x" style="left: 45%; top: 70%"><div></div></i>
+					<i class="point 3 fas fa-wifi fa-3x" style="left: 24%; top: 70%"><div></div></i>
+					<i class="point 4 fas fa-wifi fa-3x" style="left:  9%; top: 70%"><div></div></i>
+					<i class="point 5 fas fa-wifi fa-3x" style="left: 13%; top: 18%"><div></div></i>
+				</div>
 			</div>
-			
-			<div class="verdiep3 verdiep">
-				<img src="res/v3.jpg" alt="kaart verdiep 3">
-				<i class="point 0 fas fa-wifi fa-3x" style="left: 78%; top: 50%"><div></div></i>
-				<i class="point 1 fas fa-wifi fa-3x" style="left: 89%; top: 46%"><div></div></i>
-				<i class="point 2 fas fa-wifi fa-3x" style="left: 78%; top: 15%"><div></div></i>
-				<i class="point 3 fas fa-wifi fa-3x" style="left: 84%; top: 78%"><div></div></i>
-				<i class="point 4 fas fa-wifi fa-3x" style="left: 40%; top:  5%"><div></div></i>
-				<i class="point 5 fas fa-wifi fa-3x" style="left: 50%; top: 30%"><div></div></i>
-				<i class="point 6 fas fa-wifi fa-3x" style="left: 40%; top: 70%"><div></div></i>
-				<i class="point 7 fas fa-wifi fa-3x" style="left: 50%; top: 75%"><div></div></i>
-				<i class="point 8 fas fa-wifi fa-3x" style="left: 65%; top:  4%"><div></div></i>
-				<i class="point 9 fas fa-wifi fa-3x" style="left: 50%; top: 29%"><div></div></i>
+			<div class="verdiep_wrapper">
+				<div class="verdiep3 verdiep">
+					<img class="floor_img" src="res/v3.jpg" alt="kaart verdiep 3">
+					<i class="point 0 fas fa-wifi fa-3x" style="left: 78%; top: 50%"><div></div></i>
+					<i class="point 1 fas fa-wifi fa-3x" style="left: 89%; top: 46%"><div></div></i>
+					<i class="point 2 fas fa-wifi fa-3x" style="left: 78%; top: 15%"><div></div></i>
+					<i class="point 3 fas fa-wifi fa-3x" style="left: 84%; top: 78%"><div></div></i>
+					<i class="point 4 fas fa-wifi fa-3x" style="left: 40%; top:  5%"><div></div></i>
+					<i class="point 5 fas fa-wifi fa-3x" style="left: 50%; top: 30%"><div></div></i>
+					<i class="point 6 fas fa-wifi fa-3x" style="left: 40%; top: 70%"><div></div></i>
+					<i class="point 7 fas fa-wifi fa-3x" style="left: 50%; top: 75%"><div></div></i>
+					<i class="point 8 fas fa-wifi fa-3x" style="left: 65%; top:  4%"><div></div></i>
+					<i class="point 9 fas fa-wifi fa-3x" style="left: 50%; top: 29%"><div></div></i>
+				</div>
 			</div>
-			<div class="verdiep4 verdiep">
-				<img src="res/v4.jpg" alt="kaart verdiep 4">
-				<i class="point 0 fas fa-wifi fa-3x" style="left: 60%; top: 78%"><div></div></i>
-				<i class="point 1 fas fa-wifi fa-3x" style="left: 30%; top: 78%"><div></div></i>
-				<i class="point 2 fas fa-wifi fa-3x" style="left:  8%; top: 78%"><div></div></i>
-				<i class="point 3 fas fa-wifi fa-3x" style="left:  8%; top: 38%"><div></div></i>
-				<i class="point 4 fas fa-wifi fa-3x" style="left: 14%; top: 10%"><div></div></i>
-				<i class="point 5 fas fa-wifi fa-3x" style="left: 38%; top: 10%"><div></div></i>
-				<i class="point 6 fas fa-wifi fa-3x" style="left: 75%; top:  6%"><div></div></i>
-				<i class="point 7 fas fa-wifi fa-3x" style="left: 75%; top: 71%"><div></div></i>
-				<i class="point 8 fas fa-wifi fa-3x" style="left: 79%; top: 30%"><div></div></i>
+			<div class="verdiep_wrapper">
+				<div class="verdiep4 verdiep">
+					<img class="floor_img" src="res/v4.jpg" alt="kaart verdiep 4">
+					<i class="point 0 fas fa-wifi fa-3x" style="left: 60%; top: 78%"><div></div></i>
+					<i class="point 1 fas fa-wifi fa-3x" style="left: 30%; top: 78%"><div></div></i>
+					<i class="point 2 fas fa-wifi fa-3x" style="left:  8%; top: 78%"><div></div></i>
+					<i class="point 3 fas fa-wifi fa-3x" style="left:  8%; top: 38%"><div></div></i>
+					<i class="point 4 fas fa-wifi fa-3x" style="left: 14%; top: 10%"><div></div></i>
+					<i class="point 5 fas fa-wifi fa-3x" style="left: 38%; top: 10%"><div></div></i>
+					<i class="point 6 fas fa-wifi fa-3x" style="left: 75%; top:  6%"><div></div></i>
+					<i class="point 7 fas fa-wifi fa-3x" style="left: 75%; top: 71%"><div></div></i>
+					<i class="point 8 fas fa-wifi fa-3x" style="left: 79%; top: 30%"><div></div></i>
+				</div>
 			</div>
-			<div class="verdiep5 verdiep">
-				<img src="res/v5.jpg" alt="kaart verdiep 5">
-				<i class="point 0 fas fa-wifi fa-3x" style="left: 40%; top: 78%"><div></div></i>
-				<i class="point 1 fas fa-wifi fa-3x" style="left: 15%; top: 45%"><div></div></i>
-				<i class="point 2 fas fa-wifi fa-3x" style="left: 12%; top: 21%"><div></div></i>
-				<i class="point 3 fas fa-wifi fa-3x" style="left: 80%; top: 10%"><div></div></i>
-				<i class="point 4 fas fa-wifi fa-3x" style="left: 80%; top: 40%"><div></div></i>
-				<i class="point 5 fas fa-wifi fa-3x" style="left: 74%; top: 86%"><div></div></i>
+			<div class="verdiep_wrapper">
+				<div class="verdiep5 verdiep">
+					<img class="floor_img" src="res/v5.jpg" alt="kaart verdiep 5">
+					<i class="point 0 fas fa-wifi fa-3x" style="left: 40%; top: 78%"><div></div></i>
+					<i class="point 1 fas fa-wifi fa-3x" style="left: 15%; top: 45%"><div></div></i>
+					<i class="point 2 fas fa-wifi fa-3x" style="left: 12%; top: 21%"><div></div></i>
+					<i class="point 3 fas fa-wifi fa-3x" style="left: 80%; top: 10%"><div></div></i>
+					<i class="point 4 fas fa-wifi fa-3x" style="left: 80%; top: 40%"><div></div></i>
+					<i class="point 5 fas fa-wifi fa-3x" style="left: 74%; top: 86%"><div></div></i>
+				</div>
 			</div>
-			<div class="verdiep6 verdiep">
-				<img src="res/v6.jpg" alt="kaart verdiep 6">
-				<i class="point 0 fas fa-wifi fa-3x" style="left: 70%; top: 55%"><div></div></i>
-				<i class="point 1 fas fa-wifi fa-3x" style="left: 85%; top: 78%"><div></div></i>
-				<i class="point 2 fas fa-wifi fa-3x" style="left: 35%; top: 78%"><div></div></i>
-				<i class="point 3 fas fa-wifi fa-3x" style="left: 55%; top: 78%"><div></div></i>
-				<i class="point 4 fas fa-wifi fa-3x" style="left: 14%; top: 76%"><div></div></i>
-				<i class="point 5 fas fa-wifi fa-3x" style="left: 14%; top: 50%"><div></div></i>
-				<i class="point 6 fas fa-wifi fa-3x" style="left: 14%; top: 30%"><div></div></i>
-				<i class="point 7 fas fa-wifi fa-3x" style="left: 14%; top:  5%"><div></div></i>
-				<i class="point 8 fas fa-wifi fa-3x" style="left: 30%; top:  5%"><div></div></i>
+			<div class="verdiep_wrapper">
+				<div class="verdiep6 verdiep">
+					<img class="floor_img" src="res/v6.jpg" alt="kaart verdiep 6">
+					<i class="point 0 fas fa-wifi fa-3x" style="left: 70%; top: 55%"><div></div></i>
+					<i class="point 1 fas fa-wifi fa-3x" style="left: 85%; top: 78%"><div></div></i>
+					<i class="point 2 fas fa-wifi fa-3x" style="left: 35%; top: 78%"><div></div></i>
+					<i class="point 3 fas fa-wifi fa-3x" style="left: 55%; top: 78%"><div></div></i>
+					<i class="point 4 fas fa-wifi fa-3x" style="left: 14%; top: 76%"><div></div></i>
+					<i class="point 5 fas fa-wifi fa-3x" style="left: 14%; top: 50%"><div></div></i>
+					<i class="point 6 fas fa-wifi fa-3x" style="left: 14%; top: 30%"><div></div></i>
+					<i class="point 7 fas fa-wifi fa-3x" style="left: 14%; top:  5%"><div></div></i>
+					<i class="point 8 fas fa-wifi fa-3x" style="left: 30%; top:  5%"><div></div></i>
+				</div>
 			</div>
 			<div class="verdiep255 verdiep">
 				<img src="res/KULeuvenBrugge.png" alt="foto campus KU Leuven brugge">

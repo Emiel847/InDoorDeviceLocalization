@@ -7,34 +7,38 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
 	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
 	<script type="text/javascript">
-		
+		/*
+		* function that receives data on port 8080 or 9000 for local pc.
+		* According to the received data an image of a map is selected.
+		* Also a point (acces-point) is selected.
+		*/
 		//var myIp = location.host; //for PI -> proxy on port 80 ^^
 		var myIp = (location.host).slice(0,-5); //for LOCAL PC
 		function get()
 		{
 			$.ajax({
-			  	url: "http://" + myIp + ":8080",//HARDCODE THIS IP ADRRESS
+			  	url: "http://" + myIp + ":8080",
 				success: function(data)
 				{
 					var ap = data.accesPoint;
 					var verdiep = data.verdiep;
 					
-					$(".verdiep").css("visibility", "hidden" );
-					$(".point").css("visibility", "hidden" );
-					$(".verdiep" + verdiep).css("visibility", "visible" );
+					$(".verdiep").css("visibility", "hidden" ); // set all verdiepen hidden
+					$(".point").css("visibility", "hidden" ); // set all points hidden
+					$(".verdiep" + verdiep).css("visibility", "visible" ); //set specific image to visible
 					
-					if(ap != 255 && verdiep != 255){
+					if(ap != 255 && verdiep != 255){ //No error message is received
 						$( ".verdiep"+verdiep+">"+"."+ap ).css("visibility", "visible");
 						var localTime = moment.utc(data.utcTime).format('LLL')+" (utc)";
 						$("." + ap + ">" + "div").text(localTime+"\n"+data.devId);
 						$(".kaartNummer").text("verdieping "+verdiep);
-					}else{
-						$(".kaartNummer").text("Het device '"+data.devId+"' is verloren.");
+					}else{ //error message is received
+						$(".kaartNummer").text("Het device '"+data.devId+"' is verloren.");//display device is lost
 					}
 				}});
 		}
 
-		setInterval(function(){ get(); }, 500);
+		setInterval(function(){ get(); }, 500);//call function get every 500ms
 
 
 		
@@ -133,7 +137,7 @@
 					<i class="point 8 fas fa-wifi fa-3x" style="left: 30%; top:  5%"><div></div></i>
 				</div>
 			</div>
-			<div class="verdiep255 verdiep">
+			<div class="verdiep255 verdiep"> <!-- verdiep255 is een error afbeelding -->
 				<img src="res/KULeuvenBrugge.png" alt="foto campus KU Leuven brugge">
 			</div>
 		</div>

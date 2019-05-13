@@ -3,17 +3,15 @@ var express = require('express');
 var app = express();
 var fs = require('fs');
 var ttn = require('ttn');
-//var images = require("images");
-
+//variables to application on thethingsnetwork
 var appId = 'projlab_2tst';
 var accessKey = 'ttn-account-v2.k-UdLimcxHKDoXLKitj-ryjzMzx4hYVA2urPGr9LP2M';
-
 var client = new ttn.DataClient(appId, accessKey, 'eu.thethings.network:1883');
 
-//console.log(client)
-//client.on('uplink', function (msg) { console.log('Received message', msg);});
-
-var output = {utcTime:"", verdiep:0, accesPoint:0, devId:""};
+var output = {utcTime:"", verdiep:0, accesPoint:0, devId:""};// output is in json-format
+/*
+* function that listens to uplinks from ttn
+*/
 client.on("uplink", function (devId, payload) {
     console.log("*** Received uplink from", devId , "***")
 

@@ -4,19 +4,21 @@
 #include "location.h"
 //#include "debugLocation.h"
 #include "stringOperations.h"
+#include "click_4.h"
 
-#define VERSION "v1.1"
+#define VERSION "v2.2"
 #define ESP8266_DEFAULT_BAUD_RATE   115200
 #define BUFFER_SIZE 3000
 #define ENABLE true
 #define DISABLE false
 #define delay_time 1
-UARTSerial *_serial;
+Serial *_serial;
 ATCmdParser *_parser;
+click_4 *c4;
 
 //chipselect WIFI module
 DigitalOut cs_WIFI(D10);
-DigitalOut cs_LORA(D9);
+//DigitalOut cs_LORA(D9);
 DigitalOut cs_WIFI_RST(A3);
 
 StringOperations so;
@@ -24,15 +26,20 @@ StringOperations so;
 int init(void);
 void WIFI_module(bool isEnable);
 
+//reset ticker
+bool needReset = true;
+Ticker rst_ticker;
+void rst_func() {
+  //reset module
+    if(needReset == true)
+    {
+        NVIC_SystemReset();
+    }
+}
+
 int main()
 {  
     printf("Device location version %s\n\r",VERSION);
-    printf("List of known AP's\n\r");
-    
-    for (int i = 0; i < NUMBER_OF_MACS; ++i)
-    {
-        printf("location: %s => MAC: %s.\n\r", location[i], macs[i]);
-    }
     
     if(init() < 0)
     {
@@ -41,6 +48,7 @@ int main()
     }
         
     char** tokens;
+    
     
     while(1)
     {   ////////
@@ -51,11 +59,12 @@ int main()
         WIFI_module(ENABLE);
         
         //sent AT request
+        printf("Send AT command...\n\r");
         _parser->send("AT+CWLAP=\"campusroam-2.4\""); 
         
         
-        int i = 0;
         char buffer[BUFFER_SIZE];
+        int i = 0;
         bool isOk = false;
         while(!isOk)
         {
@@ -133,6 +142,22 @@ int main()
                        //                                                                             //
                        /*  -------------------------------------------------------------------------  */
                         
+                        uint8_t message[2];
+                        message[0]=location[device][0] - 48;
+                        message[1]=(location[device][2] - 48) + (10 * (location[device][1] - 48));
+                        
+                        needReset = false;
+                        
+                        //call method to initialize the click4 module and the uart
+                        //this method also lets the device join the lorawan network using OTAA
+                        c4->initialize(AppEUI, sizeof(AppEUI), AppKey, sizeof(AppKey));
+                        //call method to send a message to the TTN 
+                        c4->sendData(message, sizeof(message));
+                        //call method to reset lorawan module uart
+                        c4->close();
+                        
+                        //reset the module :/ ...
+                        NVIC_SystemReset();
                         break;
                     }
                 }
@@ -158,11 +183,22 @@ int main()
 
 int init(void)
 {
+    //start reset ticker
+    rst_ticker.attach(&rst_func, 10.0);
+    
     //enable Reset pin
     cs_WIFI_RST = 1;
     
     //activate UART and AT paser
-    _serial = new UARTSerial(D1, D0, ESP8266_DEFAULT_BAUD_RATE);
+    _serial = new Serial(D1, D0, ESP8266_DEFAULT_BAUD_RATE);
+    c4 = new click_4(D3, D9, A2, _serial);
+    
+    if( c4 == NULL)
+    {
+        printf("ERROR: Could not link click_4.\n\r");
+        return -1;
+    } 
+    
     if( _serial != NULL)
     {
         _parser = new ATCmdParser(_serial);
@@ -196,7 +232,7 @@ void WIFI_module(bool isEnable)
     if(isEnable)
     {
         cs_WIFI = 1;
-        cs_LORA = 0; //prevent lora be enable!
+        //cs_LORA = 0; //prevent lora be enable!
         wait(delay_time);
     }
     else

@@ -1,1 +1,1 @@
-# InDoorDeviceLocalisation
+# InDoorDeviceLocalization

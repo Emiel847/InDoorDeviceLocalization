@@ -70,7 +70,7 @@ void click_4::initialize(const uint8_t* AppEUI,int sizeOfAppEUI,const uint8_t* A
     //call method to set the application key
     set_app_key(AppKey, sizeOfAppKey);
     //Call method to set the next data rate
-    set_next_dr_cmd(5);
+    set_next_dr_cmd(3);
     //call method to join the network
     join_cmd(1);
     //wait untill the device has joined the network

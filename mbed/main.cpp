@@ -2,13 +2,15 @@
 #include "click_4.h"
 #include "esp8266.h"
 
-#define VERSION "v3.0"
+#define VERSION "v3.1"
 #define DEFAULT_BAUD_RATE   115200
 
 Serial *_serial;
 ATCmdParser *_parser;
 click_4 *c4;
 esp8266 *wifi;
+
+DigitalOut led(LED1);
 
 int init(void);
 
@@ -37,9 +39,11 @@ int main()
 
     while(1)
     {
-        
+        led = 1;
         printf("Scan command wifi...\n\r");
         int tableIndex = wifi->scan();
+        
+        led = 0;
         
         uint8_t message[2];
         
